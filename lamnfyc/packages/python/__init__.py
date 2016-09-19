@@ -8,9 +8,13 @@ import lamnfyc.settings
 
 
 def two_seven_installer(package, temp):
+    command = '''LDFLAGS="-L{path}/lib"
+                 LD_LIBRARY_PATH={path}/lib
+                 CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path}'''
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'Python-{}'.format(package.version))):
-        subprocess.call('./configure --prefix={} '  # '--enable-shared '
-                        '&& make && make instal'.format(lamnfyc.settings.environment_path), shell=True)
+        subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True)
+        subprocess.call('make', shell=True)
+        subprocess.call('make install', shell=True)
 
 
 def three_five_installer():
@@ -30,8 +34,8 @@ VERSIONS['2.7.12'] = lamnfyc.utils.TarPacket('https://www.python.org/ftp/python/
                                              installer=two_seven_installer,
                                              md5_signature='57dffcee9cee8bb2ab5f82af1d8e9a69',
                                              depends_on=[
-                                                 lamnfyc.utils.RequiredPacket(name='libffi', version='3.2.1'),
-                                                 lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
+                                                lamnfyc.utils.RequiredPacket(name='readline', version='6.3'),
+                                                lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
                                              ])
 
 for version, item in VERSIONS.iteritems():

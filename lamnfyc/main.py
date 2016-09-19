@@ -1,5 +1,5 @@
 import os
-import sys
+# import sys
 import yaml
 import argparse
 import pkg_resources
@@ -30,21 +30,21 @@ def main():
     environemnt_config = yaml.load(open(args.config).read())
     lamnfyc.settings.environment_path = os.path.join(os.path.abspath(os.path.curdir), args.environment)
 
-    if os.path.isdir(args.environment):
-        log.fatal('ERROR: File already exists and is not a directory.')
-        log.fatal('Please provide a different path or delete the file.')
-        sys.exit(3)
-
-    # create the cache dir if its missing
-    if not os.path.isdir(lamnfyc.settings.CACHE_PATH):
-        os.mkdir(lamnfyc.settings.CACHE_PATH)
-
-    # make sure all the paths exists
-    os.mkdir(args.environment)
-    os.mkdir(os.path.join(args.environment, 'lib'))
-    os.mkdir(os.path.join(args.environment, 'bin'))
-    os.mkdir(os.path.join(args.environment, 'share'))
-    os.mkdir(os.path.join(args.environment, 'include'))
+    # if os.path.isdir(args.environment):
+    #     log.fatal('ERROR: File already exists and is not a directory.')
+    #     log.fatal('Please provide a different path or delete the file.')
+    #     sys.exit(3)
+    #
+    # # create the cache dir if its missing
+    # if not os.path.isdir(lamnfyc.settings.CACHE_PATH):
+    #     os.mkdir(lamnfyc.settings.CACHE_PATH)
+    #
+    # # make sure all the paths exists
+    # os.mkdir(args.environment)
+    # os.mkdir(os.path.join(args.environment, 'lib'))
+    # os.mkdir(os.path.join(args.environment, 'bin'))
+    # os.mkdir(os.path.join(args.environment, 'share'))
+    # os.mkdir(os.path.join(args.environment, 'include'))
 
     # generate all the packages we need to download
     downloads = []
@@ -52,8 +52,8 @@ def main():
         package = lamnfyc.utils.import_package(package['name'], package['version'])
         downloads.append(package)
 
-        for _ in package.dependencies():
-            downloads.append(_[0])
+        for subpackage in package.dependencies():
+            downloads.append(subpackage[0])
 
     # download all the packages that are missing
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
@@ -62,7 +62,8 @@ def main():
     for package in environemnt_config['packages']:
         package = lamnfyc.utils.import_package(package['name'], package['version'])
 
-        for _ in package.dependencies():
-            print _[0]
+        for subpackage in package.dependencies():
+            subpackage[0].expand()
 
-        print package
+        #
+        # print package

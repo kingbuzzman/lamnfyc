@@ -131,6 +131,9 @@ class BasePacket(object):
 
 class TarPacket(BasePacket):
     def expand(self):
+        if self.installer.installed():
+            return
+
         if self.path.endswith('tar.xz'):
             @contextlib.contextmanager
             def xz_tar(path):
@@ -153,6 +156,9 @@ class TarPacket(BasePacket):
 
 class ZipPacket(BasePacket):
     def expand(self):
+        if self.installer.installed():
+            return
+
         log.info('Extracting {}-{}'.format(self.name, self.version))
         with self.tempdir() as temp, open(os.devnull, 'w') as FNULL:  # , zipfile.ZipFile(self.path) as zip_file:
             # zip_file.extractall(temp)

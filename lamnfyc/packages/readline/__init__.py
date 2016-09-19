@@ -4,20 +4,23 @@ import collections
 
 import lamnfyc.utils
 import lamnfyc.context_managers
+import lamnfyc.decorators
 import lamnfyc.settings
 
 
+@lamnfyc.decorators.check_installed('lib/libreadline.dylib')
 def six_three_installer(package, temp):
-    with lamnfyc.context_managers.chdir(os.path.join(temp, 'Python-{}'.format(package.version))):
-        command = './configure --prefix={} --enable-shared && make && make instal'
-        subprocess.call(command.format(lamnfyc.settings.environment_path), shell=True)
+    with lamnfyc.context_managers.chdir(os.path.join(temp, 'readline-{}'.format(package.version))):
+        subprocess.call('./configure --prefix={}'.format(lamnfyc.settings.environment_path), shell=True)
+        subprocess.call('make', shell=True)
+        subprocess.call('make install', shell=True)
 
 
 VERSIONS = collections.OrderedDict()
 VERSIONS['6.3'] = lamnfyc.utils.TarPacket('https://ftpmirror.gnu.org/readline/readline-6.3.tar.gz',
                                           installer=six_three_installer,
-                                          md5_signature='83b89587607e3eb65c70d361f13bab43')
+                                          md5_signature='33c8fb279e981274f485fd91da77e94a')
 
 for version, item in VERSIONS.iteritems():
-    item.name = 'libffi'
+    item.name = 'readline'
     item.version = version
