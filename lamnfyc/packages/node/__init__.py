@@ -16,6 +16,7 @@ def six_two_installer(package, temp):
         distutils.dir_util.copy_tree('include', os.path.join(lamnfyc.settings.environment_path, 'include'))
         distutils.dir_util.copy_tree('share', os.path.join(lamnfyc.settings.environment_path, 'share'))
         # fixes npm link
+        os.remove(os.path.join(lamnfyc.settings.environment_path, 'bin/npm'))
         os.symlink(os.path.join(lamnfyc.settings.environment_path, 'lib/node_modules/npm/bin/npm-cli.js'),
                    os.path.join(lamnfyc.settings.environment_path, 'bin/npm'))
 
