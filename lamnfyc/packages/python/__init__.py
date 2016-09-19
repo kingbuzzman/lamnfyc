@@ -40,6 +40,14 @@ VERSIONS['2.7.12'] = lamnfyc.utils.TarPacket('https://www.python.org/ftp/python/
                                                 lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
                                              ])
 
+VERSIONS['2.7.9'] = lamnfyc.utils.TarPacket('https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tar.xz',
+                                            installer=two_seven_installer,
+                                            md5_signature='38d530f7efc373d64a8fb1637e3baaa7',
+                                            depends_on=[
+                                               lamnfyc.utils.RequiredPacket(name='readline', version='6.3'),
+                                               lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
+                                            ])
+
 for version, item in VERSIONS.iteritems():
     item.name = 'python'
     item.version = version
