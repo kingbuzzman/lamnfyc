@@ -59,12 +59,12 @@ class BasePacket(object):
         # nothing found
         return False
 
-    def dependencies(self, depth=1):
+    def dependencies(self):
         for dependency in self._dependencies:
             package = import_package(dependency.name, dependency.version)
-            for subdependency in package.dependencies(depth + 1):
-                yield package, depth + 1
-            yield package, depth
+            for subdependency in package.dependencies():
+                yield package
+            yield package
 
     def install(self):
         if not self.cache_exists:

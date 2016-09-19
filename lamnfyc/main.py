@@ -53,7 +53,7 @@ def main():
         downloads.append(package)
 
         for subpackage in package.dependencies():
-            downloads.append(subpackage[0])
+            downloads.append(subpackage)
 
     # download all the packages that are missing
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
@@ -63,7 +63,6 @@ def main():
         package = lamnfyc.utils.import_package(package['name'], package['version'])
 
         for subpackage in package.dependencies():
-            subpackage[0].expand()
+            subpackage.expand()
 
-        #
-        # print package
+        package.expand()

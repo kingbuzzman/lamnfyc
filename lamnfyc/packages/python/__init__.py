@@ -5,12 +5,14 @@ import collections
 import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.settings
+import lamnfyc.decorators
 
 
+@lamnfyc.decorators.check_installed('bin/python')
 def two_seven_installer(package, temp):
     command = '''LDFLAGS="-L{path}/lib"
                  LD_LIBRARY_PATH={path}/lib
-                 CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path}'''
+                 CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path} --with-ensurepip=yes'''
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'Python-{}'.format(package.version))):
         subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True)
         subprocess.call('make', shell=True)

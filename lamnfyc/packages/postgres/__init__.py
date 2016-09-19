@@ -6,8 +6,10 @@ import collections
 import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.settings
+import lamnfyc.decorators
 
 
+@lamnfyc.decorators.check_installed('bin/postgres')
 def nine_one(package, temp):
     CHANGE_DEPENDENCY_COMMAND = 'install_name_tool -change {dependency} {new_dependency} {file}'
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'Postgres.app/Contents/MacOS')):
