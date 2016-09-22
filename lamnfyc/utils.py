@@ -35,6 +35,7 @@ class BasePacket(object):
     def __init__(self, url, **kwargs):
         self.url = url
         self.installer = required_parameter(kwargs, 'installer')
+        self.check_version = kwargs.get('check_version')
         self.md5_signature = kwargs.get('md5_signature')
         self._dependencies = kwargs.get('depends_on', [])
         self.path = os.path.join(lamnfyc.settings.CACHE_PATH, self.cache_key)
@@ -42,6 +43,10 @@ class BasePacket(object):
         # self aware variables; these get set later
         self.name = None
         self.version = None
+
+        # self assigned at the pakage init()
+        self.preinstall_callback = None
+        self.postinstall_callback = None
 
     @property
     def cache_key(self):
@@ -59,6 +64,31 @@ class BasePacket(object):
         # nothing found
         return False
 
+    @property
+    def is_properly_installed(self):
+        if not self.check_version:
+            return True
+
+        relative_path = self.installer.path
+        absolute_path = os.path.join(lamnfyc.settings.environment_path, relative_path)
+
+        if os.path.isfile(absolute_path):
+            proc = subprocess.Popen('{} --version'.format(absolute_path).split(' '), stdout=subprocess.PIPE)
+            raw_version = proc.stdout.read().rstrip()
+            if self.check_version(self, raw_version):
+                # log.debug('{} already exists, skippping'.format(relative_path))
+                return True
+        return False
+
+    def init(self, **kwargs):
+        module, func = kwargs.get('preinstall_hook', '').split(':')
+        if module:
+            self.preinstall_callback = getattr(__import__(module), func)
+
+        module, func = kwargs.get('postinstall_hook', '').split(':')
+        if module:
+            self.postinstall_callback = getattr(__import__(module), func)
+
     def dependencies(self):
         for dependency in self._dependencies:
             package = import_package(dependency.name, dependency.version)
@@ -66,9 +96,9 @@ class BasePacket(object):
                 yield package
             yield package
 
-    def install(self):
-        if not self.cache_exists:
-            yield self.download()
+    # def install(self):
+    #     if not self.cache_exists:
+    #         yield self.download()
 
     def valid_signature(self):
         if self.md5_signature:
@@ -131,8 +161,11 @@ class BasePacket(object):
 
 class TarPacket(BasePacket):
     def expand(self):
-        if self.installer.installed():
+        if self.is_properly_installed:
             return
+
+        if self.preinstall_callback:
+            self.preinstall_callback()
 
         if self.path.endswith('tar.xz'):
             @contextlib.contextmanager
@@ -153,11 +186,17 @@ class TarPacket(BasePacket):
 
             self.installer(self, temp)
 
+        if self.postinstall_callback:
+            self.postinstall_callback()
+
 
 class ZipPacket(BasePacket):
     def expand(self):
-        if self.installer.installed():
+        if self.is_properly_installed:
             return
+
+        if self.preinstall_callback:
+            self.preinstall_callback()
 
         log.info('Extracting {}-{}'.format(self.name, self.version))
         with self.tempdir() as temp, open(os.devnull, 'w') as FNULL:  # , zipfile.ZipFile(self.path) as zip_file:
@@ -167,3 +206,6 @@ class ZipPacket(BasePacket):
             subprocess.call('unzip {source} -d {destination}'.format(source=self.path, destination=temp),
                             shell=True, stdout=FNULL, stderr=FNULL)
             self.installer(self, temp)
+
+        if self.postinstall_callback:
+            self.postinstall_callback()

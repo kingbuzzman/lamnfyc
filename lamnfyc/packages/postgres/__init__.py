@@ -41,9 +41,13 @@ def nine_one(package, temp):
                                                                   file=exe_file), shell=True)
 
 
+class Postgres(lamnfyc.utils.ZipPacket):
+    pass
+
+
 VERSIONS = collections.OrderedDict()
-VERSIONS['9.1.0.0'] = lamnfyc.utils.ZipPacket('https://github.com/PostgresApp/PostgresApp/releases/download/9.1.0.0/PostgresApp-9-1-0-0.zip',  # noqa
-                                installer=nine_one, md5_signature='feb8b7d5bf4030995a26609067a9756c')
+VERSIONS['9.1.0.0'] = Postgres('https://github.com/PostgresApp/PostgresApp/releases/download/9.1.0.0/PostgresApp-9-1-0-0.zip',  # noqa
+                               installer=nine_one, md5_signature='feb8b7d5bf4030995a26609067a9756c')
 
 for version, item in VERSIONS.iteritems():
     item.name = 'postgres'
