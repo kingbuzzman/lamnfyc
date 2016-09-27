@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if ! _check_process $POSTGRES_PID; then
+  echo "Postgres is not running."
+  exit
+fi
+
+$VIRTUAL_ENV/bin/pg_ctl stop -w -D $VIRTUAL_ENV/data

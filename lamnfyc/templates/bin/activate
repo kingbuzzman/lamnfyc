@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# This file must be used with "source bin/activate" *from bash*
+# you cannot run it directly
+
+function deactivate() {
+  . $VIRTUAL_ENV/bin/__deactivate
+  . $VIRTUAL_ENV/bin/_deactivate
+
+  if [ ! "${1-}" = "nondestructive" ] ; then
+    unset -f deactivate
+  fi
+}
+
+function _check_process() {
+  local PID_FILE=$1
+  if [ ! $PID_FILE == "" ] && [ -e $PID_FILE ] && ps -p $(head -1 $PID_FILE) > /dev/null; then
+    return 0  # in bash 0 is "true"
+  fi
+  return 1  # in bash 1 is "false"
+}
+export -f _check_process
+
+export VIRTUAL_ENV="{{base_path}}"
+
+_OLD_VIRTUAL_PATH="$PATH"
+PATH="$VIRTUAL_ENV/bin:$PATH"
+export PATH
+
+# unset PYTHONHOME if set
+if ! [ -z "${PYTHONHOME+_}" ] ; then
+  _OLD_VIRTUAL_PYTHONHOME="$PYTHONHOME"
+  unset PYTHONHOME
+fi
+
+if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT-}" ] ; then
+    _OLD_VIRTUAL_PS1="$PS1"
+    if [ "x" != x ] ; then
+        PS1="$PS1"
+    else
+        PS1="(`basename \"$VIRTUAL_ENV\"`) $PS1"
+    fi
+    export PS1
+fi

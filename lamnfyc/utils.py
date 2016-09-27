@@ -8,6 +8,7 @@ import logging
 import lamnfyc.settings
 import contextlib
 import shutil
+import string
 # import zipfile
 import subprocess
 import collections
@@ -29,6 +30,23 @@ def required_parameter(obj, name, message=None):
         raise AttributeError(message.format(name=name))
     else:
         return obj[name]
+
+
+class Template(string.Template):
+    delimiter = '{{'
+    pattern = r'''
+    \{\{(?:
+    (?P<escaped>\{\{)|
+    (?P<named>[_a-z][_a-z0-9]*)\}\}|
+    (?P<braced>[_a-z][_a-z0-9]*)\}\}|
+    (?P<invalid>)
+    )
+    '''
+
+    @classmethod
+    def from_file(cls, file_path):
+        with open(file_path, 'r') as file_obj:
+            return cls(file_obj.read())
 
 
 class BasePacket(object):

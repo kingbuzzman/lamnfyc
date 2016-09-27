@@ -1,0 +1,7 @@
+
+
+# coming from the postgres package
+stop_pg
+
+unset POSTGRES_PID
+unset -f _check_and_set_sysctl

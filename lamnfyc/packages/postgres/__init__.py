@@ -1,4 +1,5 @@
 import os
+import stat
 import subprocess
 import distutils.dir_util
 import collections
@@ -42,7 +43,30 @@ def nine_one(package, temp):
 
 
 class Postgres(lamnfyc.utils.ZipPacket):
-    pass
+    def start(self):
+        pass
+
+    def expand(self):
+        base_path = os.path.join(lamnfyc.settings.BASE_PATH, 'packages', 'postgres')
+        path = os.path.join(base_path, 'bin')
+        files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
+        for file in files:
+            file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(base_path + '/', ''))
+            with open(file_path, 'w') as file_out:
+                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute())
+            st = os.stat(file_path)
+            os.chmod(file_path, st.st_mode | stat.S_IEXEC)
+
+        path = os.path.join(base_path, 'templates')
+        files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
+        for file in files:
+            file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(path + '/', ''))
+            with open(file_path, 'a') as file_out:
+                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute())
+            st = os.stat(file_path)
+            os.chmod(file_path, st.st_mode | stat.S_IEXEC)
+
+        super(Postgres, self).expand()
 
 
 VERSIONS = collections.OrderedDict()

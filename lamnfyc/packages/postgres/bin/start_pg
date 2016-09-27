@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+if _check_process $POSTGRES_PID; then
+  echo "Postgres is already running."
+  exit
+fi
+
+OPTIONS="-c unix_socket_directory=$VIRTUAL_ENV/run "`
+        `"-c max_files_per_process=100 "`
+        `"-c max_connections=120 "`
+        `"-d 5" # -h $PGHOST -p $PGPORT" \
+
+echo "Starting postgres $PGHOST:$PGPORT"
+_check_and_set_sysctl
+$VIRTUAL_ENV/bin/pg_ctl start \
+  -D $VIRTUAL_ENV/data \
+  -w \
+  -o "$OPTIONS" \
+  -l $VIRTUAL_ENV/log/postgres.log

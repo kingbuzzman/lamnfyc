@@ -1,0 +1,21 @@
+
+
+# coming from the postgres package
+
+function _check_and_set_sysctl() {
+  # Checks and sets the sysctl kern.sysv.(shmall/shmmax) values, if they're at the default we change them.
+  # Why do we do this? Postgres. Postgres needs a little more juice than what macs usually come configured with, BUT
+  # don't worry about it, this is a ephemeral change, and when/if you restart it will reset to its original value.
+  local DEFAULT_SHMALL=1024
+  local DEFAULT_SHMMAX=4194304
+  if [ ! "$(sysctl kern.sysv.shmall | awk '{print $2}')" -gt "$DEFAULT_SHMALL" ] || \
+      [ ! "$(sysctl kern.sysv.shmmax | awk '{print $2}')" -gt "$DEFAULT_SHMMAX" ]; then
+    echo "Your kern.sysv.shmmax and shmall are too low and postgres is going to complain."
+    echo "Please enter your password so we can change them."
+    # sets them to 1GB
+    sudo bash -c "sysctl -w kern.sysv.shmmax=1024000000; sysctl -w kern.sysv.shmall=1024000000"
+  fi
+}
+
+export POSTGRES_PID=$VIRTUAL_ENV/data/postmaster.pid
+export -f _check_and_set_sysctl

@@ -7,6 +7,7 @@ import logging
 import concurrent.futures
 import copy
 import subprocess
+import stat
 import operator
 
 import lamnfyc.settings
@@ -32,7 +33,7 @@ def main():
 
     args, vargs = parser.parse_known_args()
     environment_config = yaml.load(open(args.config).read())
-    lamnfyc.settings.environment_path = os.path.join(os.path.abspath(os.path.curdir), args.environment)
+    lamnfyc.settings.environment_path = os.path.join(os.path.abspath(os.path.curdir), args.environment).rstrip('/')
 
     # proc = subprocess.Popen(['bash', '-c', 'eval $(cat {} | sed "s/\$/\\$/g"); env'.format(os.path.join(args.environment, 'environment'))], stdout=subprocess.PIPE)
     # source_env = {tup[0].strip(): tup[1].strip() for tup in map(lambda s: s.strip().split('=', 1), proc.stdout)}
@@ -64,6 +65,20 @@ def main():
         f.write('# this is a generated file, do not add anything to this\n')
         for variable, value in env.iteritems():
             f.write('export {}="{}"\n'.format(variable, value or ''))
+
+    variables=''
+    path = os.path.join(lamnfyc.settings.BASE_PATH, 'templates')
+    files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
+    for file in files:
+        file_path = os.path.join(lamnfyc.settings.environment_path, 'bin', os.path.basename(file))
+        with open(file_path, 'w') as file_out:
+            file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute(base_path=lamnfyc.settings.environment_path,
+                                                                                  variables=variables))
+        st = os.stat(file_path)
+        os.chmod(file_path, st.st_mode | stat.S_IEXEC)
+
+    # # print MyTemplate('hello {{name}}').safe_substitute(names='replacement')
+    # import sys; sys.exit(0)
 
     # if os.path.isdir(args.environment):
     #     log.fatal('ERROR: File already exists and is not a directory.')
