@@ -5,6 +5,9 @@ import argparse
 import pkg_resources
 import logging
 import concurrent.futures
+import copy
+import subprocess
+import operator
 
 import lamnfyc.settings
 import lamnfyc.utils
@@ -31,6 +34,37 @@ def main():
     environment_config = yaml.load(open(args.config).read())
     lamnfyc.settings.environment_path = os.path.join(os.path.abspath(os.path.curdir), args.environment)
 
+    # proc = subprocess.Popen(['bash', '-c', 'eval $(cat {} | sed "s/\$/\\$/g"); env'.format(os.path.join(args.environment, 'environment'))], stdout=subprocess.PIPE)
+    # source_env = {tup[0].strip(): tup[1].strip() for tup in map(lambda s: s.strip().split('=', 1), proc.stdout)}
+    source_env = {}
+    file_name = os.path.join(args.environment, 'environment')
+    if os.path.isfile(file_name):
+        with open(file_name, 'r') as environ:
+            for line in environ:
+                if not line.startswith('export '):
+                    continue
+                # line = line.replace('export ', '')
+                key, value = line[7:].split('=', 1)
+                value = value.strip()
+                if value[0] == value[-1] and value.startswith(("'", '"')):
+                    value = value[1:-1]
+                source_env[key.strip()] = value
+
+    env = copy.copy(environment_config['environment']['defaults'])
+    env.update({key: None for key in environment_config['environment']['required']})
+
+    for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
+        if variable in source_env and source_env[variable]:
+            env[variable] = source_env[variable]
+            continue
+        message = environment_config['environment']['message'].format(name=variable, default=value or '')
+        env[variable] = raw_input(message) or value or None
+
+    with open(file_name, 'w') as f:
+        f.write('# this is a generated file, do not add anything to this\n')
+        for variable, value in env.iteritems():
+            f.write('export {}="{}"\n'.format(variable, value or ''))
+
     # if os.path.isdir(args.environment):
     #     log.fatal('ERROR: File already exists and is not a directory.')
     #     log.fatal('Please provide a different path or delete the file.')
@@ -46,6 +80,8 @@ def main():
     # os.mkdir(os.path.join(args.environment, 'bin'))
     # os.mkdir(os.path.join(args.environment, 'share'))
     # os.mkdir(os.path.join(args.environment, 'include'))
+    # os.mkdir(os.path.join(args.environment, 'logs'))
+    # os.mkdir(os.path.join(args.environment, 'run'))
 
     # generate all the packages we need to download
     downloads = []
