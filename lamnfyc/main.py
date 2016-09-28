@@ -9,6 +9,8 @@ import copy
 import subprocess
 import stat
 import operator
+import re
+import collections
 
 import lamnfyc.settings
 import lamnfyc.utils
@@ -77,21 +79,22 @@ def main():
         #     env[variable] = source_env[variable]
         #     continue
         message = environment_config['environment']['message'].format(name=variable, default=value or '')
-        env[variable] = raw_input(message) or value or None
+        env[variable] = value #raw_input(message) or value or None
 
     with open(os.path.join(lamnfyc.settings.environment_path, 'environment'), 'w') as f:
         f.write('# this is a generated file, do not add anything to this\n')
-        for variable, value in env.iteritems():
+
+        for variable, value in variable_order(env):
             f.write('export {}="{}"\n'.format(variable, value or ''))
 
-    variables=''
+    variables = 'unset ' + (' '.join(env.keys()))
     path = os.path.join(lamnfyc.settings.BASE_PATH, 'templates')
     files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
     for file in files:
         file_path = os.path.join(lamnfyc.settings.environment_path, 'bin', os.path.basename(file))
         with open(file_path, 'w') as file_out:
             file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute(base_path=lamnfyc.settings.environment_path,
-                                                                                  variables=variables))
+                                                                                  unset_variables=variables))
         st = os.stat(file_path)
         os.chmod(file_path, st.st_mode | stat.S_IEXEC)
 
@@ -119,3 +122,35 @@ def main():
 
         package.init(**package_item)
         package.expand()
+
+
+def variable_order(items):
+    FIND = re.compile('\$([\w]+)')
+    ready = collections.OrderedDict()
+    passes = 0
+    while True:
+        group = {}
+        passes += 1
+        for key, value in items.iteritems():
+            if key in ready or key in group:
+                continue
+
+            if '$' in (value or ''):
+                groups = FIND.findall(value)
+                counter = 0
+                for _key in groups:
+                    if _key in ready or _key in group:
+                        counter += 1
+                if counter == len(groups):
+                    group[key] = value
+            else:
+                group[key] = value
+
+        for key, value in sorted(group.items(), key=operator.itemgetter(0)):
+            ready[key] = value
+            yield key, value
+
+        if len(items.keys()) == len(ready.keys()):
+            break
+        elif passes > 10:
+            raise Exception('Weird nesting going on')

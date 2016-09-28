@@ -28,3 +28,4 @@ fi
 
 unset -f _check_process
 unset VIRTUAL_ENV
+{{unset_variables}}

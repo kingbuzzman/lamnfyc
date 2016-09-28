@@ -42,3 +42,5 @@ if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT-}" ] ; then
     fi
     export PS1
 fi
+
+. $VIRTUAL_ENV/environment

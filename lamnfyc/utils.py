@@ -9,6 +9,7 @@ import lamnfyc.settings
 import contextlib
 import shutil
 import string
+import stat
 # import zipfile
 import subprocess
 import collections
@@ -154,6 +155,30 @@ class BasePacket(object):
         log.debug('Download {}-{} complete'.format(self.name, self.version))
         return True
 
+    def install_executables(self):
+        if not hasattr(self, 'BASE_PATH'):
+            return
+
+        path = os.path.join(self.BASE_PATH, 'bin')
+        files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
+        for file in files:
+            file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(self.BASE_PATH + '/', ''))
+            with open(file_path, 'w') as file_out:
+                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute())
+            os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
+
+    def install_templates(self):
+        if not hasattr(self, 'BASE_PATH'):
+            return
+
+        path = os.path.join(self.BASE_PATH, 'templates')
+        files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
+        for file in files:
+            file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(path + '/', ''))
+            with open(file_path, 'a') as file_out:
+                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute())
+            os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
+
     @contextlib.contextmanager
     def tempdir(self):
         temp_dir = tempfile.mkdtemp()
@@ -204,6 +229,9 @@ class TarPacket(BasePacket):
 
             self.installer(self, temp)
 
+        self.install_executables()
+        self.install_templates()
+
         if self.postinstall_callback:
             self.postinstall_callback()
 
@@ -224,6 +252,9 @@ class ZipPacket(BasePacket):
             subprocess.call('unzip {source} -d {destination}'.format(source=self.path, destination=temp),
                             shell=True, stdout=FNULL, stderr=FNULL)
             self.installer(self, temp)
+
+        self.install_executables()
+        self.install_templates()
 
         if self.postinstall_callback:
             self.postinstall_callback()

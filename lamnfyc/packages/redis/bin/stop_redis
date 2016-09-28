@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if ! _check_process $REDIS_PID; then
+  echo "Redis is not running."
+  exit
+fi
+
+kill -INT $(head -1 $REDIS_PID)  # ask politely to close
+echo "Redis stopped."
