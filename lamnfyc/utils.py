@@ -84,13 +84,13 @@ class BasePacket(object):
 
     @property
     def is_properly_installed(self):
-        if not self.check_version:
-            return True
-
         relative_path = self.installer.path
         absolute_path = os.path.join(lamnfyc.settings.environment_path, relative_path)
 
         if os.path.isfile(absolute_path):
+            if not self.check_version:
+                return True
+
             proc = subprocess.Popen('{} --version'.format(absolute_path).split(' '), stdout=subprocess.PIPE)
             raw_version = proc.stdout.read().rstrip()
             if self.check_version(self, raw_version):
