@@ -2,5 +2,8 @@
 
 # coming from the redis package
 export REDIS_PID=$VIRTUAL_ENV/run/redis.pid
+export REDIS_SOCK=$VIRTUAL_ENV/run/redis.socket
+
+alias redis-cli="$VIRTUAL_ENV/bin/redis-cli -s $REDIS_SOCK $@"
 
 start_redis

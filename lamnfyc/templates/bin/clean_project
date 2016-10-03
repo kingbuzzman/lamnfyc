@@ -1,0 +1,5 @@
+#!/usr/bin/env bash -e
+
+# all the cleanup starts here
+
+find . -name '.DS_Store' -type f -delete

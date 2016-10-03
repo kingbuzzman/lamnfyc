@@ -1,16 +1,17 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
 if _check_process $REDIS_PID; then
    echo "Redis is already running."
    exit
  fi
 
- printf "Starting redis $REDIS_HOST:$REDIS_PORT .."
+ printf "Starting redis.."
 
  $VIRTUAL_ENV/bin/redis-server \
-   --port $REDIS_PORT \
-   --bind $REDIS_HOST \
+   --unixsocket $REDIS_SOCK \
+   --port 0 \
    --logfile $VIRTUAL_ENV/logs/redis.log \
    --pidfile $REDIS_PID \
    --daemonize yes
+
  printf " Done\n"

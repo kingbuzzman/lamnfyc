@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
 # This file must be used with "source bin/activate" *from bash*
 # you cannot run it directly

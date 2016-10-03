@@ -37,14 +37,14 @@ def main():
     environment_config = yaml.load(open(args.config).read())
     lamnfyc.settings.environment_path = os.path.join(os.path.abspath(os.path.curdir), args.environment).rstrip('/')
 
+    # create the cache dir if its missing
+    if not os.path.isdir(lamnfyc.settings.CACHE_PATH):
+        os.mkdir(lamnfyc.settings.CACHE_PATH)
+
     if os.path.isdir(args.environment):
         log.fatal('ERROR: File already exists and is not a directory.')
         log.fatal('Please provide a different path or delete the file.')
         sys.exit(3)
-
-    # create the cache dir if its missing
-    if not os.path.isdir(lamnfyc.settings.CACHE_PATH):
-        os.mkdir(lamnfyc.settings.CACHE_PATH)
 
     # make sure all the paths exists
     os.mkdir(args.environment)
@@ -83,6 +83,24 @@ def main():
 
     with open(os.path.join(lamnfyc.settings.environment_path, 'environment'), 'w') as f:
         f.write('# this is a generated file, do not add anything to this\n')
+        f.write("""
+urlencode() {
+    # urlencode <string>
+    old_lc_collate=$LC_COLLATE
+    LC_COLLATE=C
+
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf "$c" ;;
+            *) printf '%%%02X' "'$c" ;;
+        esac
+    done
+
+    LC_COLLATE=$old_lc_collate
+}
+""")
 
         for variable, value in variable_order(env):
             f.write('export {}="{}"\n'.format(variable, value or ''))
@@ -127,6 +145,7 @@ def main():
 def variable_order(items):
     FIND = re.compile('\$([\w]+)')
     ready = collections.OrderedDict()
+    ready['VIRTUAL_ENV'] = None
     passes = 0
     while True:
         group = {}
@@ -150,7 +169,7 @@ def variable_order(items):
             ready[key] = value
             yield key, value
 
-        if len(items.keys()) == len(ready.keys()):
+        if len(items.keys()) == (len(ready.keys()) - 1):
             break
         elif passes > 10:
             raise Exception('Weird nesting going on')

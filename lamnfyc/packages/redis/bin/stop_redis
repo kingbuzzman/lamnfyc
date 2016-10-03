@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
 if ! _check_process $REDIS_PID; then
   echo "Redis is not running."

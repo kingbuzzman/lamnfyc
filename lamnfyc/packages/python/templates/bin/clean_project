@@ -1,0 +1,5 @@
+
+
+# coming from the python package
+
+find . -name '*.pyc' -type f -delete

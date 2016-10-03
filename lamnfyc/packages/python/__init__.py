@@ -18,13 +18,17 @@ def two_seven_installer(package, temp):
         subprocess.call('make', shell=True)
         subprocess.call('make install', shell=True)
 
+    # upgrade pip to latests
+    with lamnfyc.context_managers.chdir(os.path.join(lamnfyc.settings.environment_path, 'bin')):
+        subprocess.call('pip install -U pip', shell=True)
+
 
 def three_five_installer():
     raise NotImplemented()
 
 
 class PythonPackage(lamnfyc.utils.TarPacket):
-    pass
+    BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 VERSIONS = collections.OrderedDict()
