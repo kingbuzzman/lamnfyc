@@ -32,6 +32,7 @@ def main():
     parser.add_argument('-c', '--config', default=config_default,
                         help='path to the config file, [default: {}]'.format(config_default))
     parser.add_argument('environment', help='path to the environment')
+    parser.add_argument('--reuse', action='store_true', default=False, help=argparse.SUPPRESS)
     parser.add_argument('--version', action='version', version='%(prog)s (version {})'.format(__version__))
     parser.add_argument('--verbose', action='store_true')
 
@@ -43,19 +44,23 @@ def main():
     if not os.path.isdir(lamnfyc.settings.CACHE_PATH):
         os.mkdir(lamnfyc.settings.CACHE_PATH)
 
-    if os.path.isdir(args.environment):
-        log.fatal('ERROR: File already exists and is not a directory.')
-        log.fatal('Please provide a different path or delete the file.')
-        sys.exit(3)
+    if not args.reuse:
+        # error out if the environment already exists
+        if os.path.isdir(args.environment):
+            log.fatal('ERROR: File already exists and is not a directory.')
+            log.fatal('Please provide a different path or delete the file.')
+            sys.exit(3)
 
-    # make sure all the paths exists
-    os.mkdir(args.environment)
-    os.mkdir(os.path.join(args.environment, 'lib'))
-    os.mkdir(os.path.join(args.environment, 'bin'))
-    os.mkdir(os.path.join(args.environment, 'share'))
-    os.mkdir(os.path.join(args.environment, 'include'))
-    os.mkdir(os.path.join(args.environment, 'logs'))
-    os.mkdir(os.path.join(args.environment, 'run'))
+        # make sure all the paths exists
+        os.mkdir(args.environment)
+        os.mkdir(os.path.join(args.environment, 'lib'))
+        os.mkdir(os.path.join(args.environment, 'bin'))
+        os.mkdir(os.path.join(args.environment, 'share'))
+        os.mkdir(os.path.join(args.environment, 'include'))
+        os.mkdir(os.path.join(args.environment, 'logs'))
+        os.mkdir(os.path.join(args.environment, 'run'))
+    else:
+        log.warn('Reuse mode enabled, this is not fully supported')
 
     preinstall_hook = lamnfyc.utils.import_function(environment_config.get('packages_preinstall_hook'))
     postinstall_callback = lamnfyc.utils.import_function(environment_config.get('packages_postinstall_hook'))
