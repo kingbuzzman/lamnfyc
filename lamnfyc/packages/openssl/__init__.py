@@ -4,8 +4,8 @@ import subprocess
 
 import lamnfyc.context_managers
 import lamnfyc.settings
-import lamnfyc.utils
 import lamnfyc.decorators
+import lamnfyc.packages.base
 
 
 @lamnfyc.decorators.check_installed('lib/libssl.a')
@@ -20,8 +20,8 @@ def one_zero_installer(package, temp):
 
 VERSIONS = collections.OrderedDict()
 VERSIONS['1.0.2g'] = lamnfyc.packages.base.TarPacket('https://www.openssl.org/source/openssl-1.0.2g.tar.gz',
-                                             installer=one_zero_installer,
-                                             md5_signature='f3c710c045cdee5fd114feb69feba7aa')
+                                                     installer=one_zero_installer,
+                                                     md5_signature='f3c710c045cdee5fd114feb69feba7aa')
 
 for version, item in VERSIONS.iteritems():
     item.name = 'openssl'

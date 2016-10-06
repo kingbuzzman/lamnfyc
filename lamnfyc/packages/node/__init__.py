@@ -2,10 +2,10 @@ import os
 import distutils.dir_util
 import collections
 
-import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.decorators
+import lamnfyc.packages.base
 
 from lamnfyc.logger import log
 
@@ -35,12 +35,12 @@ def check_version(package, installed_version):
 
 VERSIONS = collections.OrderedDict()
 VERSIONS['6.5.0'] = lamnfyc.packages.base.TarPacket('https://nodejs.org/dist/v6.5.0/node-v6.5.0-darwin-x64.tar.gz',
-                                            installer=six_x_installer, check_version=check_version,
-                                            md5_signature='44080b266b0312ed1ebe054538be520a')
+                                                    installer=six_x_installer, check_version=check_version,
+                                                    md5_signature='44080b266b0312ed1ebe054538be520a')
 
 VERSIONS['6.2.2'] = lamnfyc.packages.base.TarPacket('https://nodejs.org/dist/v6.2.2/node-v6.2.2-darwin-x64.tar.gz',
-                                            installer=six_x_installer, check_version=check_version,
-                                            md5_signature='6d2ea41938c4ccee53bde9423b1991fc')
+                                                    installer=six_x_installer, check_version=check_version,
+                                                    md5_signature='6d2ea41938c4ccee53bde9423b1991fc')
 
 for version, item in VERSIONS.iteritems():
     item.name = 'node'

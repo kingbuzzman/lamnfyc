@@ -2,7 +2,6 @@ import os
 import subprocess
 import collections
 
-import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.decorators
 import lamnfyc.settings

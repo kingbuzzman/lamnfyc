@@ -2,10 +2,10 @@ import os
 import subprocess
 import collections
 
-import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.decorators
 import lamnfyc.settings
+import lamnfyc.packages.base
 
 
 @lamnfyc.decorators.check_installed('lib/libreadline.dylib')
@@ -18,8 +18,8 @@ def six_three_installer(package, temp):
 
 VERSIONS = collections.OrderedDict()
 VERSIONS['6.3'] = lamnfyc.packages.base.TarPacket('https://ftpmirror.gnu.org/readline/readline-6.3.tar.gz',
-                                          installer=six_three_installer,
-                                          md5_signature='33c8fb279e981274f485fd91da77e94a')
+                                                  installer=six_three_installer,
+                                                  md5_signature='33c8fb279e981274f485fd91da77e94a')
 
 for version, item in VERSIONS.iteritems():
     item.name = 'readline'

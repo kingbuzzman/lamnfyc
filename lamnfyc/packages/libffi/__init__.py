@@ -4,7 +4,7 @@ import subprocess
 
 import lamnfyc.context_managers
 import lamnfyc.settings
-import lamnfyc.utils
+import lamnfyc.packages.base
 
 
 def three_two_installer(package, temp):
@@ -15,8 +15,8 @@ def three_two_installer(package, temp):
 
 VERSIONS = collections.OrderedDict()
 VERSIONS['3.2.1'] = lamnfyc.packages.base.TarPacket('ftp://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz',
-                                            installer=three_two_installer,
-                                            md5_signature='83b89587607e3eb65c70d361f13bab43')
+                                                    installer=three_two_installer,
+                                                    md5_signature='83b89587607e3eb65c70d361f13bab43')
 
 for version, item in VERSIONS.iteritems():
     item.name = 'libffi'
