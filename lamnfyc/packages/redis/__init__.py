@@ -2,6 +2,7 @@ import os
 import subprocess
 import collections
 
+import lamnfyc.packages.base
 import lamnfyc.context_managers
 import lamnfyc.decorators
 import lamnfyc.settings
@@ -15,6 +16,23 @@ def three_two_installer(package, temp):
 
 class RedisPackage(lamnfyc.packages.base.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
+
+    # attributed to the environment if not there
+    ENVIRONMENT_VARIABLES = (
+        lamnfyc.packages.base.required_if(('REDIS_HOST', '127.0.0.1',), lambda options: not options.unix_sockets),
+        lamnfyc.packages.base.required_if(('REDIS_PORT', '6379',), lambda options: not options.unix_sockets),
+        lamnfyc.packages.base.required_if(('REDIS_SOCK', '$VIRTUAL_ENV/run/redis.sock',),
+                                          lambda options: options.unix_sockets),
+        ('REDIS_PID', '$VIRTUAL_ENV/run/redis.pid',),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(RedisPackage, self).__init__(*args, **kwargs)
+
+        self.options.unix_sockets = False
+
+    def init_options(self, options):
+        self.options.unix_sockets = options.pop('unix_sockets', self.options.unix_sockets)
 
 
 VERSIONS = collections.OrderedDict()

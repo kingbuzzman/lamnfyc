@@ -8,10 +8,15 @@ if _check_process $REDIS_PID; then
  printf "Starting redis.."
 
  $VIRTUAL_ENV/bin/redis-server \
-   --unixsocket $REDIS_SOCK \
-   --port 0 \
    --logfile $VIRTUAL_ENV/logs/redis.log \
    --pidfile $REDIS_PID \
+   {%- if options.unix_sockets %}
+   --unixsocket $REDIS_SOCK \
+   --port 0 \
+   {% else %}
+   --port $REDIS_PORT \
+   --bind $REDIS_HOST \
+   {% endif -%}
    --daemonize yes
 
  printf " Done\n"

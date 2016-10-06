@@ -1,9 +1,7 @@
 
 
 # coming from the redis package
-export REDIS_PID=$VIRTUAL_ENV/run/redis.pid
-export REDIS_SOCK=$VIRTUAL_ENV/run/redis.socket
 
-alias redis-cli="$VIRTUAL_ENV/bin/redis-cli -s $REDIS_SOCK $@"
+alias redis-cli="$VIRTUAL_ENV/bin/redis-cli {% if options.unix_sockets %}-s $REDIS_SOCK{% else %}-p $REDIS_PORT -h $REDIS_HOST{% endif %} $@"
 
 start_redis

@@ -20,6 +20,13 @@ from lamnfyc.logger import log
 RequiredPacket = collections.namedtuple('RequiredPacket', 'name version')
 
 
+def required_if(environment_variable, condition):
+    def wrapped(options):
+        if condition(options):
+            return environment_variable
+    return wrapped
+
+
 class BasePacket(object):
     def __init__(self, url, **kwargs):
         self.url = url
@@ -143,6 +150,21 @@ class BasePacket(object):
                 fileout.write(chunk)
         log.debug('Download {}-{} complete'.format(self.name, self.version))
         return True
+
+    @property
+    def environment_variables(self):
+        # loop over all the environment variables that are being attributed to the environment
+        for item in getattr(self, 'ENVIRONMENT_VARIABLES', []):
+            if hasattr(item, '__call__'):
+                variable = item(self.options)
+                # if its visible return it
+                if variable:
+                    yield variable
+            # this is a required variable that has no default value
+            elif isinstance(item, basestring):
+                yield (item, None,)
+            else:
+                yield item
 
     def install_templates(self):
         if not hasattr(self, 'BASE_PATH'):

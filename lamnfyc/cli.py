@@ -73,6 +73,13 @@ def main():
     env = copy.copy(environment_config.get('environment', {}).get('defaults', {}))
     env.update({key: None for key in environment_config.get('environment', {}).get('required', {}) or {}})
 
+    for package_item in environment_config['packages']:
+        package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
+        package.init(**package_item)
+        for key, value in package.environment_variables:
+            if key not in env:
+                env[key] = value
+
     MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
     MESSAGE = environment_config.get('environment', {}).get('message', MESSAGE)
 
@@ -99,8 +106,8 @@ def main():
 
     # generate all the packages we need to download
     downloads = []
-    for package in environment_config['packages']:
-        package = lamnfyc.utils.import_package(package['name'], package['version'])
+    for package_item in environment_config['packages']:
+        package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
         downloads.append(package)
 
         for subpackage in package.dependencies():
@@ -119,7 +126,6 @@ def main():
         for subpackage in package.dependencies():
             subpackage.expand()
 
-        package.init(**package_item)
         package.expand()
 
     if postinstall_callback:
@@ -138,7 +144,7 @@ def variable_order(items):
             if key in ready or key in group:
                 continue
 
-            if '$' in (value or ''):
+            if '$' in (str(value) or ''):
                 groups = FIND.findall(value)
                 counter = 0
                 for _key in groups:

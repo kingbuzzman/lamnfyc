@@ -3,5 +3,4 @@
 # coming from the redis package
 stop_redis
 
-unset REDIS_PID REDIS_SOCK
 unalias redis-cli
