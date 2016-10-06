@@ -13,7 +13,7 @@ fi
 OPTIONS="-c max_files_per_process={{options.max_files_per_process}} "`
         `"-c max_connections={{options.max_connections}} "`
         `"-d 5"`
-        {% if options.unix_sockets %}`"-c unix_socket_directories=$VIRTUAL_ENV/run "{% else %}`"-h $PGHOST -p $PGPORT"{% endif %}
+        {% if options.unix_sockets %}`"-c unix_socket_directories=$PGHOST "{% else %}`"-h $PGHOST -p $PGPORT"{% endif %}
 
 echo "Starting postgres"
 _check_and_set_sysctl

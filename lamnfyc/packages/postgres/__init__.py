@@ -28,7 +28,7 @@ class PostgresPackage(lamnfyc.packages.base.TarPacket):
         lamnfyc.packages.base.required_if(('PGPORT', '6379',), lambda options: not options.unix_sockets),
         ('PGUSER', '$USER',),
         ('POSTGRES_PID', '$VIRTUAL_ENV/data/postmaster.pid',),
-        'PGDATABASE'
+        ('PGDATABASE', 'postgres',),
     )
 
     def __init__(self, *args, **kwargs):

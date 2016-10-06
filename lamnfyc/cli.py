@@ -83,6 +83,7 @@ def main():
     MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
     MESSAGE = environment_config.get('environment', {}).get('message', MESSAGE)
 
+    print 'Please enter or confirm the following environment variables, remember: When in doubt, leave-the-default'
     for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
         message = MESSAGE.format(name=variable, default=value or '')
         env[variable] = raw_input(message) or value or None
