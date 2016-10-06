@@ -61,6 +61,11 @@ class Template(string.Template):
             return cls(file_obj.read())
 
 
+class AttributeDict(dict):
+    __getattr__ = dict.__getitem__
+    __setattr__ = dict.__setitem__
+
+
 class BasePacket(object):
     def __init__(self, url, **kwargs):
         self.url = url
@@ -78,6 +83,7 @@ class BasePacket(object):
         # self assigned at the pakage init()
         self.preinstall_callback = None
         self.postinstall_callback = None
+        self.options = AttributeDict()
 
     @property
     def cache_key(self):
@@ -112,20 +118,25 @@ class BasePacket(object):
         return False
 
     def init(self, **kwargs):
+        # setup the hooks for the package
         self.preinstall_callback = import_function(kwargs.get('preinstall_hook'))
         self.postinstall_callback = import_function(kwargs.get('postinstall_hook'))
 
+        # setup the user options for the package
         options = copy.copy(kwargs.get('options', {}))
         self.init_options(options)
 
+        # alert the user of options set that were not used by the package
         message = 'Option "{option}" was passed to the {name} package and was never used, please check the options'
         for option in options.iterkeys():
             log.warn(message.format(option=option, name=self.name))
 
     def init_options(self, options):
-        # to be implemented by the subclass
+        # To be implemented by the subclass
         # Please pop the keys out of the options variable when processing them otherwise a warning will be thrown
-        # example: `self.option1 = options.pop('option1', True)`
+        # example:
+        # # self.option1 = options.pop('option1', True)
+        # # self.option2 = options.pop('option2') # this is now required
         pass
 
     def dependencies(self):
@@ -188,7 +199,7 @@ class BasePacket(object):
         for file in files:
             file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(self.BASE_PATH + '/', ''))
             with open(file_path, 'w') as file_out:
-                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute())
+                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute(self.options))
             os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
 
     def install_templates(self):

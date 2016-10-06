@@ -55,11 +55,10 @@ class BasePostgres(object):
     def __init__(self, *args, **kwargs):
         super(BasePostgres, self).__init__(*args, **kwargs)
 
-        # Options
-        self.unix_sockets = None
+        self.options.unix_sockets = None
 
     def init_options(self, options):
-        self.unix_sockets = options.pop('unix_sockets', True)
+        self.options.unix_sockets = options.pop('unix_sockets', True)
 
 
 class PostgresPackageZip(BasePostgres, lamnfyc.utils.ZipPacket):
