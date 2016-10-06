@@ -200,9 +200,6 @@ class BasePacket(object):
 
 class TarPacket(BasePacket):
     def expand(self):
-        # TODO: delete
-        self.install_templates()
-
         if self.is_properly_installed:
             return
 
