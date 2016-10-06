@@ -17,7 +17,6 @@ function _check_and_set_sysctl() {
   fi
 }
 
-export POSTGRES_PID=$VIRTUAL_ENV/data/postmaster.pid
 export -f _check_and_set_sysctl
 
 start_pg

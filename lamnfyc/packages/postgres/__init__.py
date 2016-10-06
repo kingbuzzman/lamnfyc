@@ -23,8 +23,10 @@ class PostgresPackage(lamnfyc.packages.base.TarPacket):
 
     # attributed to the environment if not there
     ENVIRONMENT_VARIABLES = (
+        # if the user is using unix_sockets it will use the $VIRTUAL_ENV/run otherwise it will use 127.0.0.1
         ('PGHOST', lamnfyc.packages.base.change_to_if('127.0.0.1', '$VIRTUAL_ENV/run',
                                                       lambda options: options.unix_sockets)),
+        # only display the port if the user is not using sockets
         lamnfyc.packages.base.required_if(('PGPORT', '6379',), lambda options: not options.unix_sockets),
         ('PGUSER', '$USER',),
         ('POSTGRES_PID', '$VIRTUAL_ENV/data/postmaster.pid',),
