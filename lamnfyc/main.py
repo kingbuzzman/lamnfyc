@@ -63,16 +63,13 @@ def main():
     if preinstall_hook:
         preinstall_hook()
 
-    env = copy.copy(environment_config['environment']['defaults'])
-    env.update({key: None for key in environment_config['environment']['required']})
+    env = copy.copy(environment_config.get('environment', {}).get('defaults', {}))
+    env.update({key: None for key in environment_config.get('environment', {}).get('required', {})})
 
     MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
-    MESSAGE = environment_config['environment'].get('message', MESSAGE)
+    MESSAGE = environment_config.get('environment', {}).get('message', MESSAGE)
 
     for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
-        # if variable in source_env and source_env[variable]:
-        #     env[variable] = source_env[variable]
-        #     continue
         message = MESSAGE.format(name=variable, default=value or '')
         env[variable] = raw_input(message) or value or None
 
