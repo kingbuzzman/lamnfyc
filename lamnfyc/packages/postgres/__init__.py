@@ -7,6 +7,7 @@ import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.decorators
+import lamnfyc.packages.base
 
 
 @lamnfyc.decorators.check_installed('bin/postgres')
@@ -25,10 +26,14 @@ class PostgresPackage(lamnfyc.packages.base.TarPacket):
     def __init__(self, *args, **kwargs):
         super(PostgresPackage, self).__init__(*args, **kwargs)
 
-        self.options.unix_sockets = None
+        self.options.unix_sockets = False
+        self.options.max_files_per_process = 100
+        self.options.max_connections = 120
 
     def init_options(self, options):
-        self.options.unix_sockets = options.pop('unix_sockets', True)
+        self.options.unix_sockets = options.pop('unix_sockets', self.options.unix_sockets)
+        self.options.max_files_per_process = options.pop('max_files_per_process', self.options.max_files_per_process)
+        self.options.max_connections = options.pop('max_connections', self.options.max_connections)
 
 
 VERSIONS = collections.OrderedDict()

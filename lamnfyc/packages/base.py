@@ -148,6 +148,11 @@ class BasePacket(object):
         if not hasattr(self, 'BASE_PATH'):
             return
 
+        template_context = {
+            'environment_path': lamnfyc.settings.environment_path,
+            'options': self.options
+        }
+
         path = os.path.join(self.BASE_PATH, 'templates')
         # find all the files inside <package>/templates/
         files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
@@ -167,11 +172,8 @@ class BasePacket(object):
                 file_obj = open(file_path, 'w')
 
             with file_obj as file_out:
-                kwargs = {
-                    'environment_path': lamnfyc.settings.environment_path
-                }
-                kwargs.update(self.options)
-                file_out.write(jinja2.Template(open(file).read()).render(**kwargs))
+                # TODO: is there a better way od doinf this?!
+                file_out.write(jinja2.Template(open(file).read()).render(**template_context))
 
             # If it goes inside /bin then give it exec permissions
             if file_path.replace(lamnfyc.settings.environment_path + os.path.sep, '').split(os.path.sep)[0] == 'bin':
@@ -221,13 +223,13 @@ class TarPacket(BasePacket):
         else:
             tarfile_obj = tarfile.open(self.path, 'r:*')
 
+        self.install_templates()
+
         log.info('Extracting {}-{}'.format(self.name, self.version))
         with self.tempdir() as temp, tarfile_obj as tar_file:
             tar_file.extractall(temp)
 
             self.installer(self, temp)
-
-        self.install_templates()
 
         if self.postinstall_callback:
             self.postinstall_callback()
@@ -241,6 +243,8 @@ class ZipPacket(BasePacket):
         if self.preinstall_callback:
             self.preinstall_callback()
 
+        self.install_templates()
+
         log.info('Extracting {}-{}'.format(self.name, self.version))
         with self.tempdir() as temp, open(os.devnull, 'w') as FNULL:  # , zipfile.ZipFile(self.path) as zip_file:
             # zip_file.extractall(temp)
@@ -249,8 +253,6 @@ class ZipPacket(BasePacket):
             subprocess.call('unzip {source} -d {destination}'.format(source=self.path, destination=temp),
                             shell=True, stdout=FNULL, stderr=FNULL)
             self.installer(self, temp)
-
-        self.install_templates()
 
         if self.postinstall_callback:
             self.postinstall_callback()

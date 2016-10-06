@@ -19,5 +19,5 @@ setup(
         'jinja2==2.8',
     ],
     entry_points={
-        'console_scripts': ['lamnfyc=lamnfyc.main:main'],
+        'console_scripts': ['lamnfyc=lamnfyc.cli:main'],
     })
