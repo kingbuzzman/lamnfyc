@@ -1,4 +1,5 @@
 import os
+import copy
 import lzma
 import tarfile
 import hashlib
@@ -113,6 +114,19 @@ class BasePacket(object):
     def init(self, **kwargs):
         self.preinstall_callback = import_function(kwargs.get('preinstall_hook'))
         self.postinstall_callback = import_function(kwargs.get('postinstall_hook'))
+
+        options = copy.copy(kwargs.get('options', {}))
+        self.init_options(options)
+
+        message = 'Option "{option}" was passed to the {name} package and was never used, please check the options'
+        for option in options.iterkeys():
+            log.warn(message.format(option=option, name=self.name))
+
+    def init_options(self, options):
+        # to be implemented by the subclass
+        # Please pop the keys out of the options variable when processing them otherwise a warning will be thrown
+        # example: `self.option1 = options.pop('option1', True)`
+        pass
 
     def dependencies(self):
         for dependency in self._dependencies:

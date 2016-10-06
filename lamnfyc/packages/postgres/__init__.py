@@ -51,11 +51,22 @@ def nine_three_installer(package, temp):
         subprocess.call('make && make install'.format(lamnfyc.settings.environment_path), shell=True)
 
 
-class PostgresPackageZip(lamnfyc.utils.ZipPacket):
+class BasePostgres(object):
+    def __init__(self, *args, **kwargs):
+        super(BasePostgres, self).__init__(*args, **kwargs)
+
+        # Options
+        self.unix_sockets = None
+
+    def init_options(self, options):
+        self.unix_sockets = options.pop('unix_sockets', True)
+
+
+class PostgresPackageZip(BasePostgres, lamnfyc.utils.ZipPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-class PostgresPackage(lamnfyc.utils.TarPacket):
+class PostgresPackage(BasePostgres, lamnfyc.utils.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
