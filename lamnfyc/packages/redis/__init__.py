@@ -14,7 +14,7 @@ def three_two_installer(package, temp):
         subprocess.call('make && make PREFIX={} install'.format(lamnfyc.settings.environment_path), shell=True)
 
 
-class RedisPackage(lamnfyc.utils.TarPacket):
+class RedisPackage(lamnfyc.packages.base.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 

@@ -19,7 +19,7 @@ def one_zero_installer(package, temp):
 
 
 VERSIONS = collections.OrderedDict()
-VERSIONS['1.0.2g'] = lamnfyc.utils.TarPacket('https://www.openssl.org/source/openssl-1.0.2g.tar.gz',
+VERSIONS['1.0.2g'] = lamnfyc.packages.base.TarPacket('https://www.openssl.org/source/openssl-1.0.2g.tar.gz',
                                              installer=one_zero_installer,
                                              md5_signature='f3c710c045cdee5fd114feb69feba7aa')
 

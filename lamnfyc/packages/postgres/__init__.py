@@ -61,11 +61,11 @@ class BasePostgres(object):
         self.options.unix_sockets = options.pop('unix_sockets', True)
 
 
-class PostgresPackageZip(BasePostgres, lamnfyc.utils.ZipPacket):
+class PostgresPackageZip(BasePostgres, lamnfyc.packages.base.ZipPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-class PostgresPackage(BasePostgres, lamnfyc.utils.TarPacket):
+class PostgresPackage(BasePostgres, lamnfyc.packages.base.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -74,8 +74,8 @@ VERSIONS['9.3.9'] = PostgresPackage('https://ftp.postgresql.org/pub/source/v9.3.
                                     installer=nine_three_installer,
                                     sha256_signature='f73bd0ec2028511732430beb22414a022d2114231366e8cbe78c149793910549',  # noqa
                                     depends_on=[
-                                        lamnfyc.utils.RequiredPacket(name='readline', version='6.3'),
-                                        lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
+                                        lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
+                                        lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
                                     ])
 VERSIONS['9.1.0.0'] = PostgresPackageZip('https://github.com/PostgresApp/PostgresApp/releases/download/9.1.0.0/PostgresApp-9-1-0-0.zip',  # noqa
                                          installer=nine_one_installer, md5_signature='feb8b7d5bf4030995a26609067a9756c')  # noqa

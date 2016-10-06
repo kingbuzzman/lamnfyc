@@ -6,6 +6,7 @@ import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.decorators
+import lamnfyc.packages.base
 
 
 @lamnfyc.decorators.check_installed('bin/python')
@@ -27,7 +28,7 @@ def three_five_installer():
     raise NotImplemented()
 
 
-class PythonPackage(lamnfyc.utils.TarPacket):
+class PythonPackage(lamnfyc.packages.base.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -36,24 +37,24 @@ VERSIONS['3.5.0'] = PythonPackage('https://www.python.org/ftp/python/3.5.0/Pytho
                                   installer=three_five_installer,
                                   md5_signature='d149d2812f10cbe04c042232e7964171',
                                   depends_on=[
-                                      lamnfyc.utils.RequiredPacket(name='readline', version='6.3'),
-                                      lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
+                                      lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
+                                      lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
                                   ])
 
 VERSIONS['2.7.12'] = PythonPackage('https://www.python.org/ftp/python/2.7.12/Python-2.7.12.tar.xz',
                                    installer=two_seven_installer,
                                    md5_signature='57dffcee9cee8bb2ab5f82af1d8e9a69',
                                    depends_on=[
-                                       lamnfyc.utils.RequiredPacket(name='readline', version='6.3'),
-                                       lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
+                                       lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
+                                       lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
                                    ])
 
 VERSIONS['2.7.9'] = PythonPackage('https://www.python.org/ftp/python/2.7.9/Python-2.7.9.tar.xz',
                                   installer=two_seven_installer,
                                   md5_signature='38d530f7efc373d64a8fb1637e3baaa7',
                                   depends_on=[
-                                      lamnfyc.utils.RequiredPacket(name='readline', version='6.3'),
-                                      lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
+                                      lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
+                                      lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
                                   ])
 
 for version, item in VERSIONS.iteritems():
