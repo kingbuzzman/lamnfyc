@@ -50,7 +50,7 @@ def main():
         # error out if the environment already exists
         if os.path.isdir(args.environment):
             log.fatal('ERROR: File already exists and is not a directory.')
-            log.fatal('Please provide a different path or delete the file.')
+            log.fatal('Please provide a different path or delete the directory.')
             sys.exit(3)
 
         # make sure all the paths exists

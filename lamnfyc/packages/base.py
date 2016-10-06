@@ -143,7 +143,8 @@ class BasePacket(object):
         if signatures_matched:
             log.debug('{}-{} hash good'.format(self.name, self.version))
         else:
-            log.warn('{}-{} hash bad. {} vs {}'.format(self.name, self.version, generated_hash, known_signature))
+            log.warn('{}-{} hash bad. Received: {}, but is expected: {}'.format(self.name, self.version,
+                                                                                generated_hash, known_signature))
         return signatures_matched
 
     def download(self):

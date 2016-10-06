@@ -56,6 +56,14 @@ VERSIONS['2.7.9'] = PythonPackage('https://www.python.org/ftp/python/2.7.9/Pytho
                                       lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
                                   ])
 
+VERSIONS['2.7.6'] = PythonPackage('https://www.python.org/ftp/python/2.7.6/Python-2.7.6.tar.xz',
+                                  installer=two_seven_installer,
+                                  md5_signature='bcf93efa8eaf383c98ed3ce40b763497',
+                                  depends_on=[
+                                      lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
+                                      lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
+                                  ])
+
 for version, item in VERSIONS.iteritems():
     item.name = 'python'
     item.version = version

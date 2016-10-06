@@ -41,7 +41,7 @@ VERSIONS['3.2.3'] = RedisPackage('http://download.redis.io/releases/redis-3.2.3.
                                  md5_signature='138209b54dfc9819e6aea7b9503f8bd3')
 VERSIONS['3.2.0'] = RedisPackage('http://download.redis.io/releases/redis-3.2.0.tar.gz',
                                  installer=three_two_installer,
-                                 md5_signature='138209b54dfc9819e6aea7b9503f8bd3')
+                                 md5_signature='9ec99ff912f35946fdb56fe273140483')
 
 for version, item in VERSIONS.iteritems():
     item.name = 'redis'
