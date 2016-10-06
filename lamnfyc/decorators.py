@@ -1,7 +1,4 @@
 import functools
-import logging
-
-log = logging.getLogger('lamnfyc')
 
 
 def check_installed(path):

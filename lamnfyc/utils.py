@@ -5,7 +5,6 @@ import tarfile
 import hashlib
 import tempfile
 import urllib2
-import logging
 import lamnfyc.settings
 import contextlib
 import shutil
@@ -15,7 +14,7 @@ import subprocess
 import collections
 import importlib
 
-log = logging.getLogger('lamnfyc')
+from lamnfyc.logger import log
 
 RequiredPacket = collections.namedtuple('RequiredPacket', 'name version')
 

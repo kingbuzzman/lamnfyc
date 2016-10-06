@@ -1,14 +1,13 @@
 import os
 import distutils.dir_util
 import collections
-import logging
 
 import lamnfyc.utils
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.decorators
 
-log = logging.getLogger('lamnfyc')
+from lamnfyc.logger import log
 
 
 @lamnfyc.decorators.check_installed('bin/node')

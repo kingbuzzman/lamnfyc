@@ -4,7 +4,6 @@ import sys
 import yaml
 import argparse
 import pkg_resources
-import logging
 import concurrent.futures
 import copy
 import operator
@@ -13,14 +12,9 @@ import collections
 
 import lamnfyc.settings
 import lamnfyc.utils
+from lamnfyc.logger import log
 
 __version__ = pkg_resources.get_distribution('lamnfyc').version
-log = logging.getLogger('lamnfyc')
-log.setLevel(logging.DEBUG)
-console = logging.StreamHandler()
-console.setLevel(logging.DEBUG)
-console.setFormatter(logging.Formatter('%(levelname)s - %(message)s'))
-log.addHandler(console)
 
 
 def main():
@@ -34,11 +28,18 @@ def main():
     parser.add_argument('environment', help='path to the environment')
     parser.add_argument('--reuse', action='store_true', default=False, help=argparse.SUPPRESS)
     parser.add_argument('--version', action='version', version='%(prog)s (version {})'.format(__version__))
-    parser.add_argument('--verbose', action='store_true')
+    parser.add_argument(
+        '-v', '--verbosity', action='store', dest='verbosity', default=20,
+        type=int, choices=[10, 20, 0],
+        help='Verbosity level; 0=normal output, 10=DEBUG, 20=INFO',
+    )
 
     args, vargs = parser.parse_known_args()
     environment_config = yaml.load(open(args.config).read())
     lamnfyc.settings.environment_path = os.path.join(os.path.abspath(os.path.curdir), args.environment).rstrip('/')
+
+    # set the logging level
+    log.setLevel(args.verbosity)
 
     # create the cache dir if its missing
     if not os.path.isdir(lamnfyc.settings.CACHE_PATH):
