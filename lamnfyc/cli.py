@@ -136,6 +136,7 @@ def variable_order(items):
     FIND = re.compile('\$([\w]+)')
     ready = collections.OrderedDict()
     ready['VIRTUAL_ENV'] = None
+    ready['USER'] = None
     passes = 0
     while True:
         group = {}
@@ -159,7 +160,9 @@ def variable_order(items):
             ready[key] = value
             yield key, value
 
-        if len(items.keys()) == (len(ready.keys()) - 1):
+        if len(items.keys()) == (len(ready.keys()) - 2):
             break
         elif passes > 10:
-            raise Exception('Weird nesting going on')
+            raise Exception('Weird nesting going on, could not find dependencies for: {}'.format(
+                ', '.join(set(items.keys()) - set(ready.keys()))
+            ))

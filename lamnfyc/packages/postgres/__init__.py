@@ -21,6 +21,16 @@ def installer(package, temp):
 class PostgresPackage(lamnfyc.packages.base.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
+    # attributed to the environment if not there
+    ENVIRONMENT_VARIABLES = (
+        ('PGHOST', lamnfyc.packages.base.change_to_if('127.0.0.1', '$VIRTUAL_ENV/run',
+                                                      lambda options: options.unix_sockets)),
+        lamnfyc.packages.base.required_if(('PGPORT', '6379',), lambda options: not options.unix_sockets),
+        ('PGUSER', '$USER',),
+        ('POSTGRES_PID', '$VIRTUAL_ENV/data/postmaster.pid',),
+        'PGDATABASE'
+    )
+
     def __init__(self, *args, **kwargs):
         super(PostgresPackage, self).__init__(*args, **kwargs)
 

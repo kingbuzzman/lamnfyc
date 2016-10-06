@@ -27,6 +27,15 @@ def required_if(environment_variable, condition):
     return wrapped
 
 
+def change_to_if(value_to_change, default_value, condition):
+    def wrapped(options):
+        if condition(options):
+            return default_value
+        else:
+            return value_to_change
+    return wrapped
+
+
 class BasePacket(object):
     def __init__(self, url, **kwargs):
         self.url = url
@@ -164,7 +173,10 @@ class BasePacket(object):
             elif isinstance(item, basestring):
                 yield (item, None,)
             else:
-                yield item
+                key, value = item
+                if hasattr(value, '__call__'):
+                    value = value(self.options)
+                yield (key, value,)
 
     def install_templates(self):
         if not hasattr(self, 'BASE_PATH'):
