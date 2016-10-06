@@ -10,7 +10,7 @@ import lamnfyc.decorators
 
 
 @lamnfyc.decorators.check_installed('bin/postgres')
-def nine_one(package, temp):
+def nine_one_installer(package, temp):
     CHANGE_DEPENDENCY_COMMAND = 'install_name_tool -change {dependency} {new_dependency} {file}'
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'Postgres.app/Contents/MacOS')):
         # "distutils.dir_util.copy_tree" returns a list of all the files copied, we're saving it so we can make sure
@@ -41,13 +41,34 @@ def nine_one(package, temp):
                                                                   file=exe_file), shell=True)
 
 
-class PostgresPackage(lamnfyc.utils.ZipPacket):
+@lamnfyc.decorators.check_installed('bin/postgres')
+def nine_three_installer(package, temp):
+    command = '''LDFLAGS="-L{path}/lib"
+                 LD_LIBRARY_PATH={path}/lib
+                 CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path}'''
+    with lamnfyc.context_managers.chdir(os.path.join(temp, 'postgresql-{}'.format(package.version))):
+        subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True)
+        subprocess.call('make && make install'.format(lamnfyc.settings.environment_path), shell=True)
+
+
+class PostgresPackageZip(lamnfyc.utils.ZipPacket):
+    BASE_PATH = os.path.dirname(os.path.realpath(__file__))
+
+
+class PostgresPackage(lamnfyc.utils.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 VERSIONS = collections.OrderedDict()
-VERSIONS['9.1.0.0'] = PostgresPackage('https://github.com/PostgresApp/PostgresApp/releases/download/9.1.0.0/PostgresApp-9-1-0-0.zip',  # noqa
-                                      installer=nine_one, md5_signature='feb8b7d5bf4030995a26609067a9756c')
+VERSIONS['9.3.9'] = PostgresPackage('https://ftp.postgresql.org/pub/source/v9.3.9/postgresql-9.3.9.tar.bz2',
+                                    installer=nine_three_installer,
+                                    sha256_signature='f73bd0ec2028511732430beb22414a022d2114231366e8cbe78c149793910549',  # noqa
+                                    depends_on=[
+                                        lamnfyc.utils.RequiredPacket(name='readline', version='6.3'),
+                                        lamnfyc.utils.RequiredPacket(name='openssl', version='1.0.2g'),
+                                    ])
+VERSIONS['9.1.0.0'] = PostgresPackageZip('https://github.com/PostgresApp/PostgresApp/releases/download/9.1.0.0/PostgresApp-9-1-0-0.zip',  # noqa
+                                         installer=nine_one_installer, md5_signature='feb8b7d5bf4030995a26609067a9756c')  # noqa
 
 for version, item in VERSIONS.iteritems():
     item.name = 'postgres'

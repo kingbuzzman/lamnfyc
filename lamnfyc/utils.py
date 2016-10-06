@@ -66,6 +66,7 @@ class BasePacket(object):
         self.installer = required_parameter(kwargs, 'installer')
         self.check_version = kwargs.get('check_version')
         self.md5_signature = kwargs.get('md5_signature')
+        self.sha256_signature = kwargs.get('sha256_signature')
         self._dependencies = kwargs.get('depends_on', [])
         self.path = os.path.join(lamnfyc.settings.CACHE_PATH, self.cache_key)
 
@@ -125,7 +126,11 @@ class BasePacket(object):
     #         yield self.download()
 
     def valid_signature(self):
-        if self.md5_signature:
+        if self.sha256_signature:
+            # if there is an sha256 signature to compare it to, do it!
+            known_signature = self.sha256_signature
+            hash_module = hashlib.sha256()
+        elif self.md5_signature:
             # if there is an md5 signature to compare it to, do it!
             known_signature = self.md5_signature
             hash_module = hashlib.md5()
