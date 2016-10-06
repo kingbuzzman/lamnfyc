@@ -2,3 +2,7 @@
 
 # coming from the postgres package
 stop_pg
+
+
+# coming from the postgres package
+stop_pg

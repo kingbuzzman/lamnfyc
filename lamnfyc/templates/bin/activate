@@ -21,7 +21,7 @@ function _check_process() {
 }
 export -f _check_process
 
-export VIRTUAL_ENV="{{base_path}}"
+export VIRTUAL_ENV="{{environment_path}}"
 
 _OLD_VIRTUAL_PATH="$PATH"
 PATH="$VIRTUAL_ENV/bin:$PATH"

@@ -9,8 +9,7 @@ import logging
 import lamnfyc.settings
 import contextlib
 import shutil
-import string
-import stat
+import jinja2
 # import zipfile
 import subprocess
 import collections
@@ -42,23 +41,6 @@ def required_parameter(obj, name, message=None):
         raise AttributeError(message.format(name=name))
     else:
         return obj[name]
-
-
-class Template(string.Template):
-    delimiter = '{{'
-    pattern = r'''
-    \{\{(?:
-    (?P<escaped>\{\{)|
-    (?P<named>[_a-z][_a-z0-9]*)\}\}|
-    (?P<braced>[_a-z][_a-z0-9]*)\}\}|
-    (?P<invalid>)
-    )
-    '''
-
-    @classmethod
-    def from_file(cls, file_path):
-        with open(file_path, 'r') as file_obj:
-            return cls(file_obj.read())
 
 
 class AttributeDict(dict):
@@ -190,29 +172,37 @@ class BasePacket(object):
         log.debug('Download {}-{} complete'.format(self.name, self.version))
         return True
 
-    def install_executables(self):
-        if not hasattr(self, 'BASE_PATH'):
-            return
-
-        path = os.path.join(self.BASE_PATH, 'bin')
-        files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
-        for file in files:
-            file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(self.BASE_PATH + '/', ''))
-            with open(file_path, 'w') as file_out:
-                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute(self.options))
-            os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
-
     def install_templates(self):
         if not hasattr(self, 'BASE_PATH'):
             return
 
         path = os.path.join(self.BASE_PATH, 'templates')
+        # find all the files inside <package>/templates/
         files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
         for file in files:
-            file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(path + '/', ''))
-            with open(file_path, 'a') as file_out:
-                file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute())
-            os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
+            # find the name of the directory that comes right after <package>/templates/
+            root_dir = file.replace(path + os.path.sep, '').split(os.path.sep)[0]
+            if root_dir == '__append':
+                # make an absolute path to the environment excluding the */__append/*
+                file_path = os.path.join(lamnfyc.settings.environment_path,
+                                         file.replace(os.path.join(path, root_dir) + os.path.sep, ''))
+                # we're appending
+                file_obj = open(file_path, 'a')
+            else:
+                # make an absolute path out of the file name pointing to the environment
+                file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(path + os.path.sep, ''))
+                # set to write
+                file_obj = open(file_path, 'w')
+
+            with file_obj as file_out:
+                kwargs = {
+                    'environment_path': lamnfyc.settings.environment_path
+                }
+                kwargs.update(self.options)
+                file_out.write(jinja2.Template(open(file).read()).render(**kwargs))
+
+            # set the same file permissions from the template to the new file
+            os.chmod(file_path, os.stat(file).st_mode)
 
     @contextlib.contextmanager
     def tempdir(self):
@@ -264,7 +254,6 @@ class TarPacket(BasePacket):
 
             self.installer(self, temp)
 
-        self.install_executables()
         self.install_templates()
 
         if self.postinstall_callback:
@@ -288,7 +277,6 @@ class ZipPacket(BasePacket):
                             shell=True, stdout=FNULL, stderr=FNULL)
             self.installer(self, temp)
 
-        self.install_executables()
         self.install_templates()
 
         if self.postinstall_callback:

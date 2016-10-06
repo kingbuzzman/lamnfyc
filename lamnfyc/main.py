@@ -1,4 +1,5 @@
 import os
+import jinja2
 import sys
 import yaml
 import argparse
@@ -6,7 +7,6 @@ import pkg_resources
 import logging
 import concurrent.futures
 import copy
-import stat
 import operator
 import re
 import collections
@@ -64,7 +64,7 @@ def main():
         preinstall_hook()
 
     env = copy.copy(environment_config.get('environment', {}).get('defaults', {}))
-    env.update({key: None for key in environment_config.get('environment', {}).get('required', {})})
+    env.update({key: None for key in environment_config.get('environment', {}).get('required', {}) or {}})
 
     MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
     MESSAGE = environment_config.get('environment', {}).get('message', MESSAGE)
@@ -73,41 +73,21 @@ def main():
         message = MESSAGE.format(name=variable, default=value or '')
         env[variable] = raw_input(message) or value or None
 
-    with open(os.path.join(lamnfyc.settings.environment_path, 'environment'), 'w') as f:
-        f.write('# this is a generated file, do not add anything to this\n')
-        f.write("""
-urlencode() {
-    # urlencode <string>
-    old_lc_collate=$LC_COLLATE
-    LC_COLLATE=C
-
-    local length="${#1}"
-    for (( i = 0; i < length; i++ )); do
-        local c="${1:i:1}"
-        case $c in
-            [a-zA-Z0-9.~_-]) printf "$c" ;;
-            *) printf '%%%02X' "'$c" ;;
-        esac
-    done
-
-    LC_COLLATE=$old_lc_collate
-}
-""")
-
-        for variable, value in variable_order(env):
-            f.write('export {}="{}"\n'.format(variable, value or ''))
-
-    variables = 'unset ' + (' '.join(env.keys()))
+    kwargs = {
+        'environment_path': lamnfyc.settings.environment_path,
+        'enironment_variables': variable_order(env),
+        'unset_variables': ' '.join(env.keys()),
+        'environment_path': lamnfyc.settings.environment_path
+    }
     path = os.path.join(lamnfyc.settings.BASE_PATH, 'templates')
     files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
     for file in files:
-        file_path = os.path.join(lamnfyc.settings.environment_path, 'bin', os.path.basename(file))
+        file_path = os.path.join(lamnfyc.settings.environment_path, file.replace(path + os.path.sep, ''))
         with open(file_path, 'w') as file_out:
-            template = lamnfyc.utils.Template.from_file(file)
-            file_out.write(template.safe_substitute(base_path=lamnfyc.settings.environment_path,
-                                                    unset_variables=variables))
-        st = os.stat(file_path)
-        os.chmod(file_path, st.st_mode | stat.S_IEXEC)
+            file_out.write(jinja2.Template(open(file).read()).render(**kwargs))
+
+        # set the same file permissions from the template to the new file
+        os.chmod(file_path, os.stat(file).st_mode)
 
     # generate all the packages we need to download
     downloads = []

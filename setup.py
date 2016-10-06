@@ -16,6 +16,7 @@ setup(
         'pyliblzma==0.5.3',
         'futures==3.0.5',
         'pyyaml==3.12',
+        'jinja2==2.8',
     ],
     entry_points={
         'console_scripts': ['lamnfyc=lamnfyc.main:main'],
