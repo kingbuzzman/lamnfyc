@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = lamnfyc
+
+[report]
+ignore_errors = True
+
+[html]
+directory = coverage_html
