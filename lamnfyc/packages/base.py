@@ -8,6 +8,7 @@ import urllib2
 import contextlib
 import shutil
 import jinja2
+import stat
 # import zipfile
 import subprocess
 import collections
@@ -172,8 +173,9 @@ class BasePacket(object):
                 kwargs.update(self.options)
                 file_out.write(jinja2.Template(open(file).read()).render(**kwargs))
 
-            # set the same file permissions from the template to the new file
-            os.chmod(file_path, os.stat(file).st_mode)
+            # If it goes inside /bin then give it exec permissions
+            if file_path.replace(lamnfyc.settings.environment_path + os.path.sep, '').split(os.path.sep)[0] == 'bin':
+                os.chmod(file_path, os.stat(file).st_mode | stat.S_IEXEC)
 
     @contextlib.contextmanager
     def tempdir(self):

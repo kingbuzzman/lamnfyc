@@ -9,6 +9,7 @@ import copy
 import operator
 import re
 import collections
+import stat
 
 import lamnfyc.settings
 import lamnfyc.utils
@@ -92,8 +93,9 @@ def main():
         with open(file_path, 'w') as file_out:
             file_out.write(jinja2.Template(open(file).read()).render(**kwargs))
 
-        # set the same file permissions from the template to the new file
-        os.chmod(file_path, os.stat(file).st_mode)
+        # If it goes inside /bin then give it exec permissions
+        if file_path.replace(lamnfyc.settings.environment_path + os.path.sep, '').split(os.path.sep)[0] == 'bin':
+            os.chmod(file_path, os.stat(file).st_mode | stat.S_IEXEC)
 
     # generate all the packages we need to download
     downloads = []
