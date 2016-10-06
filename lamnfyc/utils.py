@@ -25,6 +25,16 @@ def import_package(name, version):
     return package_import.VERSIONS[version]
 
 
+def import_function(function_name):
+    module, _, func = (function_name or '').partition(':')
+    if module:
+        try:
+            return getattr(__import__(module), func)
+        except AttributeError:
+            raise ImportError('Could not import {}'.format(function_name))
+    return None
+
+
 def required_parameter(obj, name, message=None):
     message = message or 'Parameter {name} is required'
     if name not in obj:
@@ -100,13 +110,8 @@ class BasePacket(object):
         return False
 
     def init(self, **kwargs):
-        module, func = kwargs.get('preinstall_hook', '').split(':')
-        if module:
-            self.preinstall_callback = getattr(__import__(module), func)
-
-        module, func = kwargs.get('postinstall_hook', '').split(':')
-        if module:
-            self.postinstall_callback = getattr(__import__(module), func)
+        self.preinstall_callback = import_function(kwargs.get('preinstall_hook'))
+        self.postinstall_callback = import_function(kwargs.get('postinstall_hook'))
 
     def dependencies(self):
         for dependency in self._dependencies:

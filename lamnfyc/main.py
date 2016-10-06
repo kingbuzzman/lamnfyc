@@ -6,7 +6,6 @@ import pkg_resources
 import logging
 import concurrent.futures
 import copy
-import subprocess
 import stat
 import operator
 import re
@@ -27,6 +26,9 @@ log.addHandler(console)
 def main():
     parser = argparse.ArgumentParser(description='LAMNFYC. v.{}'.format(__version__))
     config_default = os.path.join(os.getcwd(), 'lamnfyc.yaml')
+    # sets up the system path local to where the yaml file is so you can import the pre/post hooks
+    sys.path.insert(0, os.path.split(config_default)[0])
+
     parser.add_argument('-c', '--config', default=config_default,
                         help='path to the config file, [default: {}]'.format(config_default))
     parser.add_argument('environment', help='path to the environment')
@@ -55,31 +57,24 @@ def main():
     os.mkdir(os.path.join(args.environment, 'logs'))
     os.mkdir(os.path.join(args.environment, 'run'))
 
-    # # proc = subprocess.Popen(['bash', '-c', 'eval $(cat {} | sed "s/\$/\\$/g"); env'.format(os.path.join(args.environment, 'environment'))], stdout=subprocess.PIPE)
-    # # source_env = {tup[0].strip(): tup[1].strip() for tup in map(lambda s: s.strip().split('=', 1), proc.stdout)}
-    # source_env = {}
-    # file_name = os.path.join(args.environment, 'environment')
-    # if os.path.isfile(file_name):
-    #     with open(file_name, 'r') as environ:
-    #         for line in environ:
-    #             if not line.startswith('export '):
-    #                 continue
-    #             # line = line.replace('export ', '')
-    #             key, value = line[7:].split('=', 1)
-    #             value = value.strip()
-    #             if value[0] == value[-1] and value.startswith(("'", '"')):
-    #                 value = value[1:-1]
-    #             source_env[key.strip()] = value
+    preinstall_hook = lamnfyc.utils.import_function(environment_config.get('packages_preinstall_hook'))
+    postinstall_callback = lamnfyc.utils.import_function(environment_config.get('packages_postinstall_hook'))
+
+    if preinstall_hook:
+        preinstall_hook()
 
     env = copy.copy(environment_config['environment']['defaults'])
     env.update({key: None for key in environment_config['environment']['required']})
+
+    MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
+    MESSAGE = environment_config['environment'].get('message', MESSAGE)
 
     for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
         # if variable in source_env and source_env[variable]:
         #     env[variable] = source_env[variable]
         #     continue
-        message = environment_config['environment']['message'].format(name=variable, default=value or '')
-        env[variable] = value #raw_input(message) or value or None
+        message = MESSAGE.format(name=variable, default=value or '')
+        env[variable] = raw_input(message) or value or None
 
     with open(os.path.join(lamnfyc.settings.environment_path, 'environment'), 'w') as f:
         f.write('# this is a generated file, do not add anything to this\n')
@@ -111,8 +106,9 @@ urlencode() {
     for file in files:
         file_path = os.path.join(lamnfyc.settings.environment_path, 'bin', os.path.basename(file))
         with open(file_path, 'w') as file_out:
-            file_out.write(lamnfyc.utils.Template.from_file(file).safe_substitute(base_path=lamnfyc.settings.environment_path,
-                                                                                  unset_variables=variables))
+            template = lamnfyc.utils.Template.from_file(file)
+            file_out.write(template.safe_substitute(base_path=lamnfyc.settings.environment_path,
+                                                    unset_variables=variables))
         st = os.stat(file_path)
         os.chmod(file_path, st.st_mode | stat.S_IEXEC)
 
@@ -140,6 +136,9 @@ urlencode() {
 
         package.init(**package_item)
         package.expand()
+
+    if postinstall_callback:
+        postinstall_callback()
 
 
 def variable_order(items):
