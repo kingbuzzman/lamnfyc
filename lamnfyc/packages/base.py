@@ -50,6 +50,7 @@ class BasePacket(object):
         self.version = None
 
         # self assigned at the pakage init()
+        self.environment_vars = None
         self.preinstall_callback = None
         self.postinstall_callback = None
         self.options = lamnfyc.utils.AttributeDict()
@@ -72,6 +73,9 @@ class BasePacket(object):
 
     @property
     def is_properly_installed(self):
+        if not hasattr(self.installer, 'path'):
+            return False
+
         relative_path = self.installer.path
         absolute_path = os.path.join(lamnfyc.settings.environment_path, relative_path)
 
@@ -231,6 +235,7 @@ class BasePacket(object):
 class TarPacket(BasePacket):
     def expand(self):
         if self.is_properly_installed:
+            log.debug('{}-{} already installed'.format(self.name, self.version))
             return
 
         if self.preinstall_callback:
@@ -255,7 +260,7 @@ class TarPacket(BasePacket):
         with self.tempdir() as temp, tarfile_obj as tar_file:
             tar_file.extractall(temp)
 
-            self.installer(self, temp)
+            self.installer(self, temp, self.environment_vars)
 
         if self.postinstall_callback:
             self.postinstall_callback()
@@ -264,6 +269,7 @@ class TarPacket(BasePacket):
 class ZipPacket(BasePacket):
     def expand(self):
         if self.is_properly_installed:
+            log.debug('{}-{} already installed'.format(self.name, self.version))
             return
 
         if self.preinstall_callback:
@@ -278,7 +284,7 @@ class ZipPacket(BasePacket):
             # i absolutely need to maintain the file permisions; ie. executable/read
             subprocess.call('unzip {source} -d {destination}'.format(source=self.path, destination=temp),
                             shell=True, stdout=FNULL, stderr=FNULL)
-            self.installer(self, temp)
+            self.installer(self, temp, self.environment_vars)
 
         if self.postinstall_callback:
             self.postinstall_callback()

@@ -9,7 +9,7 @@ import lamnfyc.settings
 
 
 @lamnfyc.decorators.check_installed('bin/redis-server')
-def three_two_installer(package, temp):
+def three_two_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'redis-{}'.format(package.version))):
         subprocess.call('make && make PREFIX={} install'.format(lamnfyc.settings.environment_path), shell=True)
 

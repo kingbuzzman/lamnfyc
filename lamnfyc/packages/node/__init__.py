@@ -11,7 +11,7 @@ from lamnfyc.logger import log
 
 
 @lamnfyc.decorators.check_installed('bin/node')
-def six_x_installer(package, temp):
+def six_x_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'node-v{}-darwin-x64'.format(package.version))):
         distutils.dir_util.copy_tree('bin', os.path.join(lamnfyc.settings.environment_path, 'bin'))
         distutils.dir_util.copy_tree('lib', os.path.join(lamnfyc.settings.environment_path, 'lib'))

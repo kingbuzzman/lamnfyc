@@ -9,7 +9,7 @@ import lamnfyc.packages.base
 
 
 @lamnfyc.decorators.check_installed('bin/postgres')
-def installer(package, temp):
+def installer(package, temp, env):
     command = '''LDFLAGS="-L{path}/lib"
                  LD_LIBRARY_PATH={path}/lib
                  CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path}'''

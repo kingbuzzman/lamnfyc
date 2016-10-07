@@ -9,7 +9,7 @@ import lamnfyc.packages.base
 
 
 @lamnfyc.decorators.check_installed('lib/libreadline.dylib')
-def six_three_installer(package, temp):
+def six_three_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'readline-{}'.format(package.version))):
         subprocess.call('./configure --prefix={}'.format(lamnfyc.settings.environment_path), shell=True)
         subprocess.call('make', shell=True)
