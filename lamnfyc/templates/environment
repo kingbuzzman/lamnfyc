@@ -17,6 +17,6 @@ urlencode() {
   LC_COLLATE=$old_lc_collate
 }
 
-{% for variable, value in enironment_variables %}
+{% for variable, value in enironment_variables -%}
 export {{variable}}="{{value or ''}}"
 {% endfor %}

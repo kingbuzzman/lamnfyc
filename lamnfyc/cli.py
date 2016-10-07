@@ -157,14 +157,14 @@ def variable_order(items):
         group = {}
         passes += 1
         for key, value in items.iteritems():
-            if key in ready or key in group:
+            if key in ready:
                 continue
 
             if '$' in (str(value) or ''):
                 groups = FIND.findall(value)
                 counter = 0
                 for _key in groups:
-                    if _key in ready or _key in group:
+                    if _key in ready:
                         counter += 1
                 if counter == len(groups):
                     group[key] = value
