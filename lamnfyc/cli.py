@@ -9,6 +9,7 @@ import concurrent.futures
 import copy
 import operator
 import re
+import shutil
 import collections
 import stat
 
@@ -21,11 +22,14 @@ __version__ = pkg_resources.get_distribution('lamnfyc').version
 
 def main():
     parser = argparse.ArgumentParser(description='LAMNFYC. v.{}'.format(__version__))
-    config_default = os.path.join(os.getcwd(), 'lamnfyc.yaml')
+    default_name = 'lamnfyc.yaml'
+    config_default = os.path.join(os.getcwd(), default_name)
 
     parser.add_argument('-c', '--config', default=config_default,
                         help='path to the config file, [default: {}]'.format(config_default))
-    parser.add_argument('environment', help='path to the environment')
+    parser.add_argument('environment', nargs='?', help='path to the environment')
+    parser.add_argument('--init', action='store_true',
+                        help='creates a {} file inside your current working directory'.format(default_name))
     parser.add_argument('--reuse', action='store_true', default=False, help=argparse.SUPPRESS)
     parser.add_argument('--version', action='version', version='%(prog)s (version {})'.format(__version__))
     parser.add_argument(
@@ -35,6 +39,16 @@ def main():
     )
 
     args, vargs = parser.parse_known_args()
+
+    if args.init:
+        if os.path.exists(config_default):
+            log.fatal('ERROR: File {} already exists.'.format(config_default))
+            sys.exit(3)
+        shutil.copyfile(os.path.join(lamnfyc.settings.BASE_PATH, default_name), config_default)
+        sys.exit(0)
+    elif not args.environment:
+        parser.error("the environment name is required")
+
     environment_config = yaml.load(open(args.config).read())
     # need the absolute path to the environment
     lamnfyc.settings.environment_path = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir),

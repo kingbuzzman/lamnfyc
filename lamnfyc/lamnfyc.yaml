@@ -1,0 +1,13 @@
+packages:
+  # - name: PACKAGE_NAME
+  #   version: PACKAGE_VERSION
+
+
+# all the environment variables needed to run the app
+environment:
+  # required:
+  #   - SUPER_SECRET_KEY
+  #   - OTHER_SECRET_KEY
+  #
+  # defaults:
+  #   PUBLIC_ENV_VARIABLE: "public value"
