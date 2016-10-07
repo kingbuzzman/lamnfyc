@@ -1,5 +1,6 @@
 import os
 import jinja2
+import subprocess
 import sys
 import yaml
 import argparse
@@ -83,10 +84,11 @@ def main():
     MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
     MESSAGE = environment_config.get('environment', {}).get('message', MESSAGE)
 
-    print 'Please enter or confirm the following environment variables, remember: When in doubt, leave-the-default'
-    for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
-        message = MESSAGE.format(name=variable, default=value or '')
-        env[variable] = raw_input(message) or value or None
+    if env:
+        print 'Please enter or confirm the following environment variables, remember: When in doubt, leave-the-default'
+        for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
+            message = MESSAGE.format(name=variable, default=value or '')
+            env[variable] = raw_input(message) or value or None
 
     kwargs = {
         'environment_path': lamnfyc.settings.environment_path,
@@ -105,14 +107,22 @@ def main():
         if file_path.replace(lamnfyc.settings.environment_path + os.path.sep, '').split(os.path.sep)[0] == 'bin':
             os.chmod(file_path, os.stat(file).st_mode | stat.S_IEXEC)
 
+    # after all the environment variables have been written, lets read them back up to get nice and clean values
+    # without any $VARIABLE in them
+    command = 'bash -c "export VIRTUAL_ENV={0}; export PATH={0}/bin:$PATH; source {0}/environment; env"'
+    proc = subprocess.Popen(command.format(lamnfyc.settings.environment_path), shell=True, stdout=subprocess.PIPE)
+    env = dict((line.split("=", 1) for line in proc.stdout.read().splitlines()))
+
     # generate all the packages we need to download
     downloads = []
     for package_item in environment_config['packages']:
         package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
+        package.environment_vars = env
         downloads.append(package)
 
         for subpackage in package.dependencies():
             downloads.append(subpackage)
+            subpackage.environment_vars = env
 
     # download all the packages that are missing
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
