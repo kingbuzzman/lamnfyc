@@ -6,21 +6,29 @@ import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.decorators
 import lamnfyc.packages.base
+import lamnfyc.utils
 
 
 @lamnfyc.decorators.check_installed('bin/python')
-def two_seven_installer(package, temp):
+def two_seven_installer(package, temp, env):
     command = '''LDFLAGS="-L{path}/lib"
                  LD_LIBRARY_PATH={path}/lib
                  CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path} --with-ensurepip=yes'''
-    with lamnfyc.context_managers.chdir(os.path.join(temp, 'Python-{}'.format(package.version))):
-        subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True)
-        subprocess.call('make', shell=True)
-        subprocess.call('make install', shell=True)
+    temp = os.path.join(temp, 'Python-{}'.format(package.version))
+    with lamnfyc.context_managers.chdir(temp):
+        subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True, env=env)
+        subprocess.call('make', shell=True, env=env)
+        subprocess.call('make install', shell=True, env=env)
+
+        # pip doenst exist, need to go get it
+        if not os.path.exists(os.path.join(lamnfyc.settings.environment_path, 'bin', 'pip')):
+            ez_setup_path = os.path.join(temp, 'ez_setup.py')
+            lamnfyc.utils.download('https://bootstrap.pypa.io/ez_setup.py', ez_setup_path)
+            subprocess.call('python {}'.format(ez_setup_path), shell=True, env=env)
+            subprocess.call('easy_install pip', shell=True, env=env)
 
     # upgrade pip to latests
-    with lamnfyc.context_managers.chdir(os.path.join(lamnfyc.settings.environment_path, 'bin')):
-        subprocess.call('pip install -U pip', shell=True)
+    subprocess.call('pip install -U pip', shell=True, env=env)
 
 
 def three_five_installer():
@@ -29,6 +37,16 @@ def three_five_installer():
 
 class PythonPackage(lamnfyc.packages.base.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
+
+
+class Python27Package(PythonPackage):
+    """
+    Used for python < 2.7.9 where pip was not integrated
+    """
+    # attributed to the environment if not there
+    ENVIRONMENT_VARIABLES = (
+        ('PYTHONNOUSERSITE', '$VIRTUAL_ENV/lib/python2.7/site-packages',),
+    )
 
 
 VERSIONS = collections.OrderedDict()
@@ -56,13 +74,13 @@ VERSIONS['2.7.9'] = PythonPackage('https://www.python.org/ftp/python/2.7.9/Pytho
                                       lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
                                   ])
 
-VERSIONS['2.7.6'] = PythonPackage('https://www.python.org/ftp/python/2.7.6/Python-2.7.6.tar.xz',
-                                  installer=two_seven_installer,
-                                  md5_signature='bcf93efa8eaf383c98ed3ce40b763497',
-                                  depends_on=[
-                                      lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
-                                      lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
-                                  ])
+VERSIONS['2.7.6'] = Python27Package('https://www.python.org/ftp/python/2.7.6/Python-2.7.6.tar.xz',
+                                    installer=two_seven_installer,
+                                    md5_signature='bcf93efa8eaf383c98ed3ce40b763497',
+                                    depends_on=[
+                                        lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
+                                        lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
+                                    ])
 
 for version, item in VERSIONS.iteritems():
     item.name = 'python'
