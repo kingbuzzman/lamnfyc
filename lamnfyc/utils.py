@@ -1,11 +1,18 @@
 import importlib
+import contextlib
+import urllib2
 
 from lamnfyc.logger import log  # noqa
 
 
 def import_package(name, version):
     package_import = importlib.import_module(__package__ + '.packages.' + name)
-    return package_import.VERSIONS[version]
+    try:
+        return package_import.VERSIONS[version]
+    except KeyError:
+        raise KeyError('{} {} was not found, these are the options: {}'.format(
+            name, version, ', '.join(package_import.VERSIONS)
+        ))
 
 
 def import_function(function_name):
