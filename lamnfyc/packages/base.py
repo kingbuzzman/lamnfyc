@@ -4,7 +4,6 @@ import lzma
 import tarfile
 import hashlib
 import tempfile
-import urllib2
 import contextlib
 import shutil
 import jinja2
@@ -149,15 +148,7 @@ class BasePacket(object):
 
     def download(self):
         log.debug('Downloading {}-{}, saving it to {}'.format(self.name, self.version, self.path))
-        # make a request to the url, open the file we need to save it to
-        with contextlib.closing(urllib2.urlopen(self.url)) as response, open(self.path, 'wb') as fileout:
-            # endless loop to read 16 * 1024 bytes in at a time until its done
-            while True:
-                chunk = response.read(16 * 1024)
-                if not chunk:
-                    break
-                # write what we go back
-                fileout.write(chunk)
+        lamnfyc.utils.download(self.url, self.path)
         log.debug('Download {}-{} complete'.format(self.name, self.version))
         return True
 

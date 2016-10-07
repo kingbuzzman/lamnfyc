@@ -29,3 +29,14 @@ def required_parameter(obj, name, message=None):
 class AttributeDict(dict):
     __getattr__ = dict.__getitem__
     __setattr__ = dict.__setitem__
+
+
+def download(url, path, chunk_size=16 * 1024):
+    with contextlib.closing(urllib2.urlopen(url)) as response, open(path, 'wb') as fileout:
+        # endless loop to read `chunk_size` bytes in at a time until its done
+        while True:
+            chunk = response.read(chunk_size)
+            if not chunk:
+                break
+            # write what we go back
+            fileout.write(chunk)
