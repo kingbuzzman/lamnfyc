@@ -7,6 +7,7 @@ If you want to be REALLY safe:
 
 `virtualenv /tmp/test-lamnfyc`
 `/tmp/test-lamnfyc/bin/pip install -r requirements.txt`
+`/tmp/test-lamnfyc/bin/pip install -e ..`
 `PYTHONPATH=..:$PYTHONPATH /tmp/test-lamnfyc/bin/coverage run runtests.py`
 `/tmp/test-lamnfyc/bin/coverage report -m`
 

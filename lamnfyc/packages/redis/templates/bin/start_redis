@@ -7,7 +7,7 @@ if _check_process $REDIS_PID; then
 
  printf "Starting redis.."
 
- $VIRTUAL_ENV/bin/redis-server \
+ $VIRTUAL_ENV/bin/redis-server $VIRTUAL_ENV/conf/redis.conf \
    --logfile $VIRTUAL_ENV/logs/redis.log \
    --pidfile $REDIS_PID \
    {%- if options.unix_sockets %}

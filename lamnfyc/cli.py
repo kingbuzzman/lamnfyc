@@ -22,8 +22,6 @@ __version__ = pkg_resources.get_distribution('lamnfyc').version
 def main():
     parser = argparse.ArgumentParser(description='LAMNFYC. v.{}'.format(__version__))
     config_default = os.path.join(os.getcwd(), 'lamnfyc.yaml')
-    # sets up the system path local to where the yaml file is so you can import the pre/post hooks
-    sys.path.insert(0, os.path.split(config_default)[0])
 
     parser.add_argument('-c', '--config', default=config_default,
                         help='path to the config file, [default: {}]'.format(config_default))
@@ -38,7 +36,12 @@ def main():
 
     args, vargs = parser.parse_known_args()
     environment_config = yaml.load(open(args.config).read())
-    lamnfyc.settings.environment_path = os.path.join(os.path.abspath(os.path.curdir), args.environment).rstrip('/')
+    # need the absolute path to the environment
+    lamnfyc.settings.environment_path = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir),
+                                                                                     args.environment).rstrip('/'))
+
+    # sets up the system path local to where the yaml file is so you can import the pre/post hooks
+    sys.path.insert(0, os.path.dirname(os.path.abspath(args.config)))
 
     # set the logging level
     log.setLevel(args.verbosity)
@@ -60,6 +63,7 @@ def main():
         os.mkdir(os.path.join(args.environment, 'bin'))
         os.mkdir(os.path.join(args.environment, 'share'))
         os.mkdir(os.path.join(args.environment, 'include'))
+        os.mkdir(os.path.join(args.environment, 'conf'))
         os.mkdir(os.path.join(args.environment, 'logs'))
         os.mkdir(os.path.join(args.environment, 'run'))
     else:
