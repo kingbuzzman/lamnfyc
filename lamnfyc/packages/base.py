@@ -9,7 +9,6 @@ import shutil
 import jinja2
 import stat
 # import zipfile
-import subprocess
 import collections
 
 import lamnfyc.utils
@@ -83,8 +82,8 @@ class BasePacket(object):
             if not self.check_version:
                 return True
 
-            proc = subprocess.Popen('{} --version'.format(absolute_path).split(' '), stdout=subprocess.PIPE)
-            raw_version = proc.stdout.read().rstrip()
+            stdout, _, _ = lamnfyc.utils.syscall('{} --version'.format(absolute_path).split(' '))
+            raw_version = stdout.read().rstrip()
             if self.check_version(self, raw_version):
                 # log.debug('{} already exists, skippping'.format(relative_path))
                 return True
@@ -282,8 +281,8 @@ class ZipPacket(BasePacket):
             # zip_file.extractall(temp)
             # Python's zip file utility has been broken since 2012 im forced to come up with this work around because
             # i absolutely need to maintain the file permisions; ie. executable/read
-            subprocess.call('unzip {source} -d {destination}'.format(source=self.path, destination=temp),
-                            shell=True, stdout=FNULL, stderr=FNULL)
+            lamnfyc.utils.syscall('unzip {source} -d {destination}'.format(source=self.path, destination=temp),
+                                  stdout=FNULL, stderr=FNULL)
             self.installer(self, temp, self.environment_vars)
 
         if self.postinstall_callback:

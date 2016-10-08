@@ -1,5 +1,4 @@
 import os
-import subprocess
 import collections
 
 import lamnfyc.context_managers
@@ -16,19 +15,19 @@ def two_seven_installer(package, temp, env):
                  CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path} --with-ensurepip=yes'''
     temp = os.path.join(temp, 'Python-{}'.format(package.version))
     with lamnfyc.context_managers.chdir(temp):
-        subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True, env=env)
-        subprocess.call('make', shell=True, env=env)
-        subprocess.call('make install', shell=True, env=env)
+        lamnfyc.utils.syscall(command.format(path=lamnfyc.settings.environment_path), env=env)
+        lamnfyc.utils.syscall('make', env=env)
+        lamnfyc.utils.syscall('make install', env=env)
 
         # pip doenst exist, need to go get it
         if not os.path.exists(os.path.join(lamnfyc.settings.environment_path, 'bin', 'pip')):
             ez_setup_path = os.path.join(temp, 'ez_setup.py')
             lamnfyc.utils.download('https://bootstrap.pypa.io/ez_setup.py', ez_setup_path)
-            subprocess.call('python {}'.format(ez_setup_path), shell=True, env=env)
-            subprocess.call('easy_install pip', shell=True, env=env)
+            lamnfyc.utils.syscall('python {}'.format(ez_setup_path), env=env)
+            lamnfyc.utils.syscall('easy_install pip', env=env)
 
     # upgrade pip to latests
-    subprocess.call('pip install -U pip', shell=True, env=env)
+    lamnfyc.utils.syscall('pip install -U pip', env=env)
 
 
 def three_five_installer():

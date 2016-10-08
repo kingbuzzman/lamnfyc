@@ -1,11 +1,11 @@
 import os
 import collections
-import subprocess
 
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.packages.base
 import lamnfyc.decorators
+import lamnfyc.utils
 
 
 @lamnfyc.decorators.check_installed('lib/libldap.a')
@@ -19,8 +19,8 @@ def two_four_installer(package, temp, env):
         command = '''LDFLAGS="-L{path}/lib"
                      LD_LIBRARY_PATH={path}/lib
                      CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure ''' + args
-        subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True)
-        subprocess.call('make && make install', shell=True)
+        lamnfyc.utils.syscall(command.format(path=lamnfyc.settings.environment_path))
+        lamnfyc.utils.syscall('make && make install')
 
 
 VERSIONS = collections.OrderedDict()

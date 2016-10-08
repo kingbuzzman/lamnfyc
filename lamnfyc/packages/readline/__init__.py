@@ -1,19 +1,19 @@
 import os
-import subprocess
 import collections
 
 import lamnfyc.context_managers
 import lamnfyc.decorators
 import lamnfyc.settings
 import lamnfyc.packages.base
+import lamnfyc.utils
 
 
 @lamnfyc.decorators.check_installed('lib/libreadline.dylib')
 def six_three_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'readline-{}'.format(package.version))):
-        subprocess.call('./configure --prefix={}'.format(lamnfyc.settings.environment_path), shell=True)
-        subprocess.call('make', shell=True)
-        subprocess.call('make install', shell=True)
+        lamnfyc.utils.syscall('./configure --prefix={}'.format(lamnfyc.settings.environment_path))
+        lamnfyc.utils.syscall('make')
+        lamnfyc.utils.syscall('make install')
 
 
 VERSIONS = collections.OrderedDict()

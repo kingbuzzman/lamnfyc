@@ -1,5 +1,8 @@
-# this is a generated file, do not add anything to this
+# All environment variables go here, feel free to modify them as you will
 
+# This is a helper function for when you're using unix sockets and need to
+# encode the url inside a variable, example:
+# export DATABASE_URL="postgres://$(urlencode unix://$PGHOST)/$PGDATABASE"
 urlencode() {
   # urlencode <string>
   old_lc_collate=$LC_COLLATE
@@ -9,8 +12,8 @@ urlencode() {
   for (( i = 0; i < length; i++ )); do
   local c="${1:i:1}"
   case $c in
-      [a-zA-Z0-9.~_-]) printf "$c" ;;
-      *) printf '%%%02X' "'$c" ;;
+    [a-zA-Z0-9.~_-]) printf "$c" ;;
+    *) printf '%%%02X' "'$c" ;;
   esac
   done
 

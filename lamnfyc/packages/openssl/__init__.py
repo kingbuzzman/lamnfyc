@@ -1,6 +1,5 @@
 import os
 import collections
-import subprocess
 
 import lamnfyc.context_managers
 import lamnfyc.settings
@@ -11,11 +10,10 @@ import lamnfyc.packages.base
 @lamnfyc.decorators.check_installed('lib/libssl.a')
 def one_zero_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'openssl-{}'.format(package.version))):
-        subprocess.call('./Configure darwin64-x86_64-cc --prefix={}'.format(lamnfyc.settings.environment_path),
-                        shell=True)
-        subprocess.call('make depend', shell=True)
-        subprocess.call('make', shell=True)
-        subprocess.call('make install', shell=True)
+        lamnfyc.utils.syscall('./Configure darwin64-x86_64-cc --prefix={}'.format(lamnfyc.settings.environment_path))
+        lamnfyc.utils.syscall('make depend')
+        lamnfyc.utils.syscall('make')
+        lamnfyc.utils.syscall('make install')
 
 
 VERSIONS = collections.OrderedDict()

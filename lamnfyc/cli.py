@@ -1,6 +1,5 @@
 import os
 import jinja2
-import subprocess
 import sys
 import yaml
 import argparse
@@ -83,16 +82,19 @@ def main():
     else:
         log.warn('Reuse mode enabled, this is not fully supported')
 
+    # initialize the file level logging
+    start_file_log(lamnfyc.settings.environment_path)
+
     preinstall_hook = lamnfyc.utils.import_function(environment_config.get('packages_preinstall_hook'))
     postinstall_callback = lamnfyc.utils.import_function(environment_config.get('packages_postinstall_hook'))
 
     if preinstall_hook:
         preinstall_hook()
 
-    env = copy.copy(environment_config.get('environment', {}).get('defaults', {}))
-    env.update({key: None for key in environment_config.get('environment', {}).get('required', {}) or {}})
+    env = copy.copy((environment_config.get('environment') or {}).get('defaults', {}))
+    env.update({key: None for key in (environment_config.get('environment') or {}).get('required', {}) or {}})
 
-    for package_item in environment_config['packages']:
+    for package_item in (environment_config.get('packages') or []):
         package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
         package.init(**package_item)
         for key, value in package.environment_variables:
@@ -100,7 +102,7 @@ def main():
                 env[key] = value
 
     MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
-    MESSAGE = environment_config.get('environment', {}).get('message', MESSAGE)
+    MESSAGE = (environment_config.get('environment') or {}).get('message', MESSAGE)
 
     if env:
         print 'Please enter or confirm the following environment variables, remember: When in doubt, leave-the-default'
@@ -128,12 +130,12 @@ def main():
     # after all the environment variables have been written, lets read them back up to get nice and clean values
     # without any $VARIABLE in them
     command = 'bash -c "export VIRTUAL_ENV={0}; export PATH={0}/bin:$PATH; source {0}/environment; env"'
-    proc = subprocess.Popen(command.format(lamnfyc.settings.environment_path), shell=True, stdout=subprocess.PIPE)
-    env = dict((line.split("=", 1) for line in proc.stdout.read().splitlines()))
+    stdout, _, _ = lamnfyc.utils.syscall(command.format(lamnfyc.settings.environment_path))
+    env = dict((line.split("=", 1) for line in stdout.read().splitlines()))
 
     # generate all the packages we need to download
     downloads = []
-    for package_item in environment_config['packages']:
+    for package_item in (environment_config.get('packages') or []):
         package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
         package.environment_vars = env
         downloads.append(package)
@@ -149,7 +151,7 @@ def main():
     # Install all packages, uppermost first, meaning;
     # If say Package1 depends on Package2 which in turn that depends on Package3, the order or the install will be:
     # Package3 gets installed first, then Package2, and lastly Package1
-    for package_item in environment_config['packages']:
+    for package_item in (environment_config.get('packages') or []):
         package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
 
         for subpackage in package.dependencies():

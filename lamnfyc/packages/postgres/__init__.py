@@ -1,11 +1,11 @@
 import os
-import subprocess
 import collections
 
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.decorators
 import lamnfyc.packages.base
+import lamnfyc.utils
 
 
 @lamnfyc.decorators.check_installed('bin/postgres')
@@ -14,8 +14,8 @@ def installer(package, temp, env):
                  LD_LIBRARY_PATH={path}/lib
                  CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path}'''
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'postgresql-{}'.format(package.version))):
-        subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True)
-        subprocess.call('make && make install-world-contrib-recurse', shell=True)
+        lamnfyc.utils.syscall(command.format(path=lamnfyc.settings.environment_path))
+        lamnfyc.utils.syscall('make && make install-world-contrib-recurse')
 
 
 class PostgresPackage(lamnfyc.packages.base.TarPacket):
