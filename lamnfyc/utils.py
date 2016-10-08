@@ -1,6 +1,8 @@
 import importlib
 import contextlib
 import urllib2
+import subprocess
+import StringIO
 
 from lamnfyc.logger import log  # noqa
 
@@ -31,6 +33,43 @@ def required_parameter(obj, name, message=None):
         raise AttributeError(message.format(name=name))
     else:
         return obj[name]
+
+
+def syscall(command, **kwargs):
+    stdout = StringIO.StringIO()
+    stderr = StringIO.StringIO()
+    acceptable_codes = tuple(kwargs.pop('acceptable_codes', (0,)))
+    kwargs['shell'] = kwargs.get('shell', True)
+    kwargs['stdout'] = kwargs.get('stdout', subprocess.PIPE)
+    kwargs['stderr'] = kwargs.get('stderr', subprocess.PIPE)
+
+    log.debug('$ ' + command)
+    proc = subprocess.Popen(command, **kwargs)
+    while True:
+        _stdout = proc.stdout.readline().replace('\n', '')
+        _stderr = proc.stderr.readline().replace('\n', '')
+
+        if _stdout:
+            log.debug(_stdout)
+            stdout.writelines([_stdout])
+
+        if _stderr:
+            # There are is a lot of output that gets thrown to stderr that is
+            # more of a warning than error, and this will just scare the users
+            # more than be informative
+            log.debug(_stderr)
+            stdout.writelines([_stderr])
+
+        if not _stdout and not _stderr:
+            break
+
+    code = proc.wait()
+    if code not in acceptable_codes:
+        raise Exception('Command {} generated a {} code, acceptable codes are: {}'.format(command, code,
+                                                                                          acceptable_codes))
+    stdout.seek(0)
+    stderr.seek(0)
+    return stdout, stderr, code
 
 
 class AttributeDict(dict):
