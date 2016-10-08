@@ -15,7 +15,7 @@ import stat
 
 import lamnfyc.settings
 import lamnfyc.utils
-from lamnfyc.logger import log
+from lamnfyc.logger import (log, start_file_log)
 
 __version__ = pkg_resources.get_distribution('lamnfyc').version
 
@@ -52,13 +52,13 @@ def main():
     environment_config = yaml.load(open(args.config).read())
     # need the absolute path to the environment
     lamnfyc.settings.environment_path = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir),
-                                                                                     args.environment).rstrip('/'))
+                                                                     args.environment).rstrip('/'))
 
     # sets up the system path local to where the yaml file is so you can import the pre/post hooks
     sys.path.insert(0, os.path.dirname(os.path.abspath(args.config)))
 
-    # set the logging level
-    log.setLevel(args.verbosity)
+    # set the logging level to console only
+    log.handlers[0].setLevel(args.verbosity)
 
     # create the cache dir if its missing
     if not os.path.isdir(lamnfyc.settings.CACHE_PATH):
