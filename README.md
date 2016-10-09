@@ -52,7 +52,7 @@ Q. Whats with the name?
 
 > working title, not important, carry on.
 
-Q. Why is this?
+Q. Why this?
 
 > this is FULL environment isolation
 
@@ -62,7 +62,7 @@ Q. Why not use `virtualbox` or `vagrant` or `docker`?
 
 Q. Why not use `virtualenv` or `n`/`nvm` or ...?
 
-> you can, this just isolates other dependencies as well, such as redis, postgres..
+> you can, this just isolates other dependencies as well, such as redis, postgres.. as well as you can have a specific version of python and/or ruby at the same time scoped for your environment.
 
 Q. How fast is this?
 
