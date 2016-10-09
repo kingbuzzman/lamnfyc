@@ -1,7 +1,6 @@
 import importlib
 import contextlib
 import urllib2
-import StringIO
 
 from lamnfyc.logger import log  # noqa
 

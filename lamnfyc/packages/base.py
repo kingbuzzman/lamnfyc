@@ -283,7 +283,7 @@ class ZipPacket(BasePacket):
             # Python's zip file utility has been broken since 2012 im forced to come up with this work around because
             # i absolutely need to maintain the file permisions; ie. executable/read
             subprocess.call('unzip {source} -d {destination}'.format(source=self.path, destination=temp, shell=True),
-                                  stdout=FNULL, stderr=FNULL)
+                            stdout=FNULL, stderr=FNULL)
             self.installer(self, temp, self.environment_vars)
 
         if self.postinstall_callback:
