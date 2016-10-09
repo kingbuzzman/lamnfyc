@@ -11,6 +11,7 @@ import re
 import shutil
 import collections
 import stat
+import subprocess
 
 import lamnfyc.settings
 import lamnfyc.utils
@@ -130,8 +131,8 @@ def main():
     # after all the environment variables have been written, lets read them back up to get nice and clean values
     # without any $VARIABLE in them
     command = 'bash -c "export VIRTUAL_ENV={0}; export PATH={0}/bin:$PATH; source {0}/environment; env"'
-    stdout, _, _ = lamnfyc.utils.syscall(command.format(lamnfyc.settings.environment_path))
-    env = dict((line.split("=", 1) for line in stdout.read().splitlines()))
+    proc = subprocess.Popen(command.format(lamnfyc.settings.environment_path), shell=True, stdout=subprocess.PIPE)
+    env = dict((line.split("=", 1) for line in proc.stdout.read().splitlines()))
 
     # generate all the packages we need to download
     downloads = []

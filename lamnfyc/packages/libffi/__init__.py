@@ -4,13 +4,13 @@ import collections
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.packages.base
-import lamnfyc.utils
+import subprocess
 
 
 def three_two_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'libffi-{}'.format(package.version))):
         command = './configure --prefix={} --enable-shared && make && make instal'
-        lamnfyc.utils.syscall(command.format(lamnfyc.settings.environment_path))
+        subprocess.call(command.format(lamnfyc.settings.environment_path), shell=True)
 
 
 VERSIONS = collections.OrderedDict()

@@ -5,13 +5,15 @@ import lamnfyc.packages.base
 import lamnfyc.context_managers
 import lamnfyc.decorators
 import lamnfyc.settings
-import lamnfyc.utils
+import subprocess
 
 
 @lamnfyc.decorators.check_installed('bin/redis-server')
 def three_two_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'redis-{}'.format(package.version))):
-        lamnfyc.utils.syscall('make && make PREFIX={} install'.format(lamnfyc.settings.environment_path))
+        subprocess.call('make', shell=True)
+        subprocess.call('make PREFIX={} install'.format(lamnfyc.settings.environment_path), shell=True)
+        subprocess.call('make test', shell=True)
 
 
 class RedisPackage(lamnfyc.packages.base.TarPacket):
