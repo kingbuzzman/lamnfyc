@@ -1,22 +1,25 @@
 #!/usr/bin/env bash -e
 
 if _check_process $REDIS_PID; then
-   echo "Redis is already running."
-   exit
- fi
+  echo "Redis is already running."
+  exit
+fi
 
- printf "Starting redis.."
+printf "Starting redis.."
 
- $VIRTUAL_ENV/bin/redis-server $VIRTUAL_ENV/conf/redis.conf \
-   --logfile $VIRTUAL_ENV/logs/redis.log \
-   --pidfile $REDIS_PID \
-   {%- if options.unix_sockets %}{# TODO: get rid of this and look for the variable name #}
-   --unixsocket $REDIS_SOCK \
-   --port 0 \
-   {% else %}
-   --port $REDIS_PORT \
-   --bind $REDIS_HOST \
-   {% endif -%}
-   --daemonize yes
+# if the REDIS_SOCK variable exists then.. we're using sockets!
+if [ ! -z $REDIS_SOCK ]; then
+  OPTIONS="--unixsocket $REDIS_SOCK "`
+           `"--port 0 "
+else
+  OPTIONS="--port $REDIS_PORT "`
+           `"--bind $REDIS_HOST "
+fi
 
- printf " Done\n"
+OPTIONS+="--logfile $VIRTUAL_ENV/logs/redis.log "`
+        `"--pidfile $REDIS_PID "`
+        `"--daemonize yes "
+
+$VIRTUAL_ENV/bin/redis-server $VIRTUAL_ENV/conf/redis.conf $OPTIONS
+
+printf " Done\n"

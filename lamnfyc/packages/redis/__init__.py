@@ -13,7 +13,8 @@ def three_two_installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp, 'redis-{}'.format(package.version))):
         subprocess.call('make', shell=True)
         subprocess.call('make PREFIX={} install'.format(lamnfyc.settings.environment_path), shell=True)
-        subprocess.call('make test', shell=True)
+        # this requires some memory interspection tools that needs sudo, so its been disabled for that reason
+        # subprocess.call('make test', shell=True)
 
 
 class RedisPackage(lamnfyc.packages.base.TarPacket):

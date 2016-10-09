@@ -10,9 +10,14 @@ if [ ! -e $VIRTUAL_ENV/data ]; then
   $VIRTUAL_ENV/bin/initdb -D $VIRTUAL_ENV/data -EUTF-8 --locale=$LANG
 fi
 
-{# TODO: get rid of the unix_sockets and look for the variable name #}
-OPTIONS="{% if options.unix_sockets %}-c unix_socket_directories=$PGHOST{% else %}-h $PGHOST -p $PGPORT{% endif %} "`
-        `"-c max_files_per_process={{options.max_files_per_process}} "`
+# if there is no PGPORT then, we're using unixsockets
+if [ -z $PGPORT ]; then
+  OPTIONS="-c unix_socket_directories=$PGHOST "
+else
+  OPTIONS="-h $PGHOST -p $PGPORT "
+fi
+
+OPTIONS+="-c max_files_per_process={{options.max_files_per_process}} "`
         `"-c max_connections={{options.max_connections}} "`
         `"-d 5"
 
