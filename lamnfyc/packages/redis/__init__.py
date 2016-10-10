@@ -23,7 +23,7 @@ class RedisPackage(lamnfyc.packages.base.TarPacket):
     # attributed to the environment if not there
     ENVIRONMENT_VARIABLES = (
         lamnfyc.packages.base.required_if(('REDIS_HOST', '127.0.0.1',), lambda options: not options.unix_sockets),
-        lamnfyc.packages.base.required_if(('REDIS_PORT', '6379',), lambda options: not options.unix_sockets),
+        lamnfyc.packages.base.required_if(('REDIS_PORT', '$(random_port)',), lambda options: not options.unix_sockets),
         lamnfyc.packages.base.required_if(('REDIS_SOCK', '$VIRTUAL_ENV/run/redis.sock',),
                                           lambda options: options.unix_sockets),
         ('REDIS_PID', '$VIRTUAL_ENV/run/redis.pid',),

@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+"""
+Binds to the OS's 0 port to get a random unique port
+"""
+import socket
+
+s = socket.socket()
+s.bind(("", 0))
+print s.getsockname()[1]
+s.close()
