@@ -53,6 +53,7 @@ class BasePacket(object):
         self.environment_vars = None
         self.preinstall_callback = None
         self.postinstall_callback = None
+        self.internal_templates = None
         self.options = lamnfyc.utils.AttributeDict()
 
     @property
@@ -94,6 +95,9 @@ class BasePacket(object):
         # setup the hooks for the package
         self.preinstall_callback = lamnfyc.utils.import_function(kwargs.get('preinstall_hook'))
         self.postinstall_callback = lamnfyc.utils.import_function(kwargs.get('postinstall_hook'))
+
+        # setup the internal templates
+        self.internal_templates = kwargs.get('templates', {})
 
         # setup the user options for the package
         options = copy.copy(kwargs.get('options', {}))
@@ -207,7 +211,18 @@ class BasePacket(object):
 
             # If it goes inside /bin then give it exec permissions
             if file_path.replace(lamnfyc.settings.environment_path + os.path.sep, '').split(os.path.sep)[0] == 'bin':
-                os.chmod(file_path, os.stat(file).st_mode | stat.S_IEXEC)
+                os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
+
+        # Populate any templates added to the config file
+        for file_name, content in self.internal_templates.iteritems():
+            file_path = os.path.join(lamnfyc.settings.environment_path, file_name)
+            with open(file_path, 'w') as file_out:
+                # TODO: is there a better way od doinf this?!
+                file_out.write(jinja2.Template(content).render(**template_context))
+
+            # If it goes inside /bin then give it exec permissions
+            if file_name.split(os.path.sep)[0] == 'bin':
+                os.chmod(file_path, os.stat(file_path).st_mode | stat.S_IEXEC)
 
     @contextlib.contextmanager
     def tempdir(self):
