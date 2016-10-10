@@ -30,6 +30,8 @@ def main():
     parser.add_argument('environment', nargs='?', help='path to the environment')
     parser.add_argument('--init', action='store_true',
                         help='creates a {} file inside your current working directory'.format(default_name))
+    parser.add_argument('--prompt-all', action='store_true', default=False,
+                        help='prompt me for every option, don\'t default anything')
     parser.add_argument('--reuse', action='store_true', default=False, help=argparse.SUPPRESS)
     parser.add_argument('--version', action='version', version='%(prog)s (version {})'.format(__version__))
     parser.add_argument(
@@ -108,8 +110,12 @@ def main():
     if env:
         print 'Please enter or confirm the following environment variables, remember: When in doubt, leave-the-default'
         for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
-            message = MESSAGE.format(name=variable, default=value or '')
-            env[variable] = raw_input(message) or value or None
+            if args.prompt_all or value is None or value == '':
+                message = MESSAGE.format(name=variable, default=value or '')
+                value = raw_input(message) or value or ''
+            else:
+                value = value or ''
+            env[variable] = value
 
     kwargs = {
         'environment_path': lamnfyc.settings.environment_path,
