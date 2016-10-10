@@ -12,7 +12,6 @@ from pip.req import parse_requirements
 from itertools import chain
 from collections import defaultdict
 from argparse import ArgumentParser
-from functools import partial
 
 log = logging.getLogger(__file__)
 if not log.handlers:
@@ -35,7 +34,7 @@ def main():
     # paste together all the requirement files
     generator = chain(*[parse_requirements(req, session=False) for req in args.requirements])
     # defaultdict that has a defaultdict of sets: {'..': {'..': set()}}
-    parsed = defaultdict(lambda : defaultdict(set))
+    parsed = defaultdict(lambda: defaultdict(set))
     # loop over all that are not links (i.e. git links)
     for requirement in [x for x in generator if x.link is None]:
         if '==' in str(requirement.req):
