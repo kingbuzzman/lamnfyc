@@ -36,6 +36,38 @@ This will create a folder very much like a `virtualenv` the only difference is t
 
 Are you using `virtualenvwrapper`? Then do `lamnfyc $WORKON_HOME/env`
 
+
+## Scared? Isolate yourself from the isolation
+
+* `virtualenv /tmp/test`
+
+  create a virtualenv to isolate yourself from this installation
+
+* `/tmp/test/bin/pip install git+ssh://git@github.com/kingbuzzman/lamnfyc.git@master#egg=lamnfyc`
+
+  install the package from github
+
+
+* `cd /your/amazing/project/root/`
+
+  go to your project
+
+* `/tmp/test/bin/lamnfyc --init`
+
+  now modify the `lamnfyc.yaml` to make it specific to you
+
+* `/tmp/test/bin/lamnfyc xenv`
+
+  create the environment, for this particular example the name of our environment is going to be called `xenv`
+
+* `rm /tmp/test`
+
+  at this point you can delete the `/tmp/test` directory, its not needed
+
+* `xenv/bin/activate`
+
+  now play around with it.. remember to `deactivate` it when you're done
+
 ## Some goodies
 
 Like what you're used to, `source ..../environment_name/bin/activate` sets everything up, and I mean everything. (or `workon environment_name`)
