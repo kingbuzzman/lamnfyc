@@ -12,6 +12,7 @@ setup(
     author='Javier Buzzi',
     author_email='buzzi.javier@gmail.com',
     license='MIT',
+    packages=['lamnfyc'],
     install_requires=[
         'pyliblzma==0.5.3',
         'futures==3.0.5',
