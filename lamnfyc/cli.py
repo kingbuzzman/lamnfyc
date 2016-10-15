@@ -1,17 +1,14 @@
 import os
 import jinja2
 import sys
-import yaml
 import argparse
 import pkg_resources
 import concurrent.futures
-import copy
 import operator
 import re
 import shutil
 import collections
 import stat
-import subprocess
 
 import lamnfyc.settings
 import lamnfyc.utils
@@ -51,7 +48,7 @@ def main():
     elif not args.environment:
         parser.error("the environment name is required")
 
-    environment_config = yaml.load(open(args.config).read())
+    environment_config = lamnfyc.utils.Configuration(args.config)
     # need the absolute path to the environment
     lamnfyc.settings.environment_path = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir),
                                                                      args.environment).rstrip('/'))
@@ -88,39 +85,15 @@ def main():
     # initialize the file level logging
     start_file_log(lamnfyc.settings.environment_path)
 
-    preinstall_hook = lamnfyc.utils.import_function(environment_config.get('packages_preinstall_hook'))
-    postinstall_callback = lamnfyc.utils.import_function(environment_config.get('packages_postinstall_hook'))
+    if environment_config.preinstall_hook:
+        environment_config.preinstall_hook()
 
-    if preinstall_hook:
-        preinstall_hook()
-
-    env = copy.copy((environment_config.get('environment') or {}).get('defaults', {}))
-    env.update({key: None for key in (environment_config.get('environment') or {}).get('required', {}) or {}})
-
-    for package_item in (environment_config.get('packages') or []):
-        package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
-        package.init(**package_item)
-        for key, value in package.environment_variables:
-            if key not in env:
-                env[key] = value
-
-    MESSAGE = 'What is the value for {name}? [defaults: "{default}"] '
-    MESSAGE = (environment_config.get('environment') or {}).get('message', MESSAGE)
-
-    if env:
-        print 'Please enter or confirm the following environment variables, remember: When in doubt, leave-the-default'
-        for variable, value in sorted(env.items(), key=operator.itemgetter(0)):
-            if args.prompt_all or value is None or value == '':
-                message = MESSAGE.format(name=variable, default=value or '')
-                value = raw_input(message) or value or ''
-            else:
-                value = value or ''
-            env[variable] = value
+    environment_config.prompt_missing(missing_only=not args.prompt_all)
 
     kwargs = {
         'environment_path': lamnfyc.settings.environment_path,
-        'enironment_variables': variable_order(env),
-        'unset_variables': ' '.join(env.keys()),
+        'enironment_variables': variable_order(environment_config.env),
+        'unset_variables': ' '.join(environment_config.env.keys()),
         'environment_path': lamnfyc.settings.environment_path
     }
     path = os.path.join(lamnfyc.settings.BASE_PATH, 'templates')
@@ -136,20 +109,18 @@ def main():
 
     # after all the environment variables have been written, lets read them back up to get nice and clean values
     # without any $VARIABLE in them
-    command = 'bash -c "export VIRTUAL_ENV={0}; export PATH={0}/bin:$PATH; source {0}/environment; env"'
-    proc = subprocess.Popen(command.format(lamnfyc.settings.environment_path), shell=True, stdout=subprocess.PIPE)
-    env = dict((line.split("=", 1) for line in proc.stdout.read().splitlines()))
+    environment_config.reload_env(lamnfyc.settings.environment_path)
 
     # generate all the packages we need to download
     downloads = []
-    for package_item in (environment_config.get('packages') or []):
+    for package_item in environment_config.packages:
         package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
-        package.environment_vars = env
+        package.environment_vars = environment_config.env
         downloads.append(package)
 
         for subpackage in package.dependencies():
             downloads.append(subpackage)
-            subpackage.environment_vars = env
+            subpackage.environment_vars = environment_config.env
 
     # download all the packages that are missing
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
@@ -158,7 +129,7 @@ def main():
     # Install all packages, uppermost first, meaning;
     # If say Package1 depends on Package2 which in turn that depends on Package3, the order or the install will be:
     # Package3 gets installed first, then Package2, and lastly Package1
-    for package_item in (environment_config.get('packages') or []):
+    for package_item in environment_config.packages:
         package = lamnfyc.utils.import_package(package_item['name'], package_item['version'])
 
         for subpackage in package.dependencies():
@@ -166,8 +137,8 @@ def main():
 
         package.expand()
 
-    if postinstall_callback:
-        postinstall_callback()
+    if environment_config.postinstall_callback:
+        environment_config.postinstall_callback()
 
 
 def variable_order(items):
