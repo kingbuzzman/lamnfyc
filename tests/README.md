@@ -1,19 +1,12 @@
-`cd tests`
-`pip install -r requirements.txt`
-`PYTHONPATH=..:$PYTHONPATH ./runtests.py`
-`flake8 --config=.flakerc ../lamnfyc`
-
-If you want to be REALLY safe:
+Follow these instructions:
 
 `virtualenv /tmp/test-lamnfyc`
-`/tmp/test-lamnfyc/bin/pip install -r requirements.txt`
-`/tmp/test-lamnfyc/bin/pip install -e ..`
-`PYTHONPATH=..:$PYTHONPATH /tmp/test-lamnfyc/bin/coverage run runtests.py`
-`/tmp/test-lamnfyc/bin/coverage report -m`
+`/tmp/test-lamnfyc/bin/pip install -r tests/requirements.txt`
+`/tmp/test-lamnfyc/bin/nosetests --with-coverage`
 
 To test PEP8-ness
 
-`/tmp/test-lamnfyc/bin/flake8 --config=.flakerc ../lamnfyc`
+`/tmp/test-lamnfyc/bin/flake8 ../lamnfyc`
 
 And when you're done testing:
 

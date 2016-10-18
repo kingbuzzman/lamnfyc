@@ -1,3 +1,5 @@
+-e .
+
 flake8
 mock
 coverage

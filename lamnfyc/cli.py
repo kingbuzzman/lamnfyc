@@ -64,21 +64,24 @@ def main():
         os.mkdir(lamnfyc.settings.CACHE_PATH)
 
     if not args.reuse:
+        log.debug('Starting environment: {}'.format(lamnfyc.settings.environment_path))
         # error out if the environment already exists
-        if os.path.isdir(args.environment):
+        if os.path.isdir(lamnfyc.settings.environment_path):
             log.fatal('ERROR: File already exists and is not a directory.')
             log.fatal('Please provide a different path or delete the directory.')
             sys.exit(3)
 
         # make sure all the paths exists
-        os.mkdir(args.environment)
-        os.mkdir(os.path.join(args.environment, 'lib'))
-        os.mkdir(os.path.join(args.environment, 'bin'))
-        os.mkdir(os.path.join(args.environment, 'share'))
-        os.mkdir(os.path.join(args.environment, 'include'))
-        os.mkdir(os.path.join(args.environment, 'conf'))
-        os.mkdir(os.path.join(args.environment, 'logs'))
-        os.mkdir(os.path.join(args.environment, 'run'))
+        os.mkdir(lamnfyc.settings.environment_path)
+        # Standard unix installation structure
+        os.mkdir(os.path.join(lamnfyc.settings.environment_path, 'lib'))
+        os.mkdir(os.path.join(lamnfyc.settings.environment_path, 'bin'))
+        os.mkdir(os.path.join(lamnfyc.settings.environment_path, 'share'))
+        os.mkdir(os.path.join(lamnfyc.settings.environment_path, 'include'))
+        # Appended structure, to house configuration files, logs, and sock/run files
+        os.mkdir(os.path.join(lamnfyc.settings.environment_path, 'conf'))
+        os.mkdir(os.path.join(lamnfyc.settings.environment_path, 'logs'))
+        os.mkdir(os.path.join(lamnfyc.settings.environment_path, 'run'))
     else:
         log.warn('Reuse mode enabled, this is not fully supported')
 

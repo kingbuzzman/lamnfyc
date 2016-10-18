@@ -11,6 +11,7 @@ import lamnfyc.context_managers
 class TestEnvironment(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Tests that the base yaml file works as intended
         simple = """
 environment:
   required:
@@ -20,6 +21,7 @@ environment:
     DEFAULT_ONE: "VALUE_ONE"
     DEFAULT_TWO: "VALUE_TWO"
 """
+        # Tests that everything from simple.yaml gets inherited correctly
         dependency = """
 environment:
   inherits: simple.yaml
@@ -29,6 +31,7 @@ environment:
     DEFAULT_THREE: "VALUE_THREE"
 """
 
+        # Tests that everything from dependency.yaml gets inherited correctly
         dependency2 = """
 environment:
   inherits: ../dependency.yaml
@@ -42,6 +45,7 @@ environment:
 
         cls.temp_folder = tempfile.mkdtemp()
 
+        # Saves everything inside a temporary folder to tests hierarchies
         with lamnfyc.context_managers.chdir(cls.temp_folder):
             with open('simple.yaml', 'w') as file_obj:
                 file_obj.write(simple)

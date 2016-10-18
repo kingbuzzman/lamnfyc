@@ -1,5 +1,5 @@
 *.pyc
 *.egg-info/
 
-tests/coverage_html/
-tests/.coverage
+nosetests.xml
+.coverage
