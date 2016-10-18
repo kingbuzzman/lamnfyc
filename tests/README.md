@@ -4,11 +4,11 @@ Follow these instructions:
 
 `/tmp/test-lamnfyc/bin/pip install -r tests/requirements.txt`
 
-`/tmp/test-lamnfyc/bin/nosetests --with-coverage`
+`/tmp/test-lamnfyc/bin/nosetests`
 
 To test PEP8-ness
 
-`/tmp/test-lamnfyc/bin/flake8 ../lamnfyc`
+`/tmp/test-lamnfyc/bin/flake8 lamnfyc`
 
 And when you're done testing:
 
