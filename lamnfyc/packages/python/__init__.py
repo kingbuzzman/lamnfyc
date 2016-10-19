@@ -11,8 +11,9 @@ import subprocess
 @lamnfyc.decorators.check_installed('bin/python')
 def two_seven_installer(package, temp, env):
     command = '''LDFLAGS="-L{path}/lib"
-                 LD_LIBRARY_PATH={path}/lib
-                 CPPFLAGS="-I{path}/include -I{path}/ssl" ./configure --prefix={path} --with-ensurepip=yes'''
+                 CPPFLAGS="-I{path}/include -I{path}/ssl"
+                 CFLAGS="-I{path}/include"
+                 LD_LIBRARY_PATH={path}/lib ./configure --prefix={path} --enable-shared --with-ensurepip=yes'''
     temp = os.path.join(temp, 'Python-{}'.format(package.version))
     with lamnfyc.context_managers.chdir(temp):
         subprocess.call(command.format(path=lamnfyc.settings.environment_path), env=env, shell=True)
