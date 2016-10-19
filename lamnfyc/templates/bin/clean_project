@@ -3,3 +3,6 @@
 # all the cleanup starts here
 
 find . -name '.DS_Store' -type f -delete
+# Clear all the log files inside the virtualenv; writting processes
+# do not need to be restarted
+for file in $(find $VIRTUAL_ENV/logs -type f); do > $file; done
