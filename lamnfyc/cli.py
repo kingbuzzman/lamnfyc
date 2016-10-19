@@ -17,10 +17,28 @@ from lamnfyc.logger import (log, start_file_log)
 __version__ = pkg_resources.get_distribution('lamnfyc').version
 
 
-def main():
-    parser = argparse.ArgumentParser(description='LAMNFYC. v.{}'.format(__version__))
-    default_name = 'lamnfyc.yaml'
-    config_default = os.path.join(os.getcwd(), default_name)
+class ArgumentParser(argparse.ArgumentParser):
+    def parse_known_args(self, *_args, **kwargs):
+        args, namespace = super(ArgumentParser, self).parse_known_args(*_args, **kwargs)
+
+        if args.init:
+            if os.path.exists(self.config_default):
+                raise self.error('File {} already exists.'.format(self.config_default))
+            shutil.copyfile(os.path.join(lamnfyc.settings.BASE_PATH, self.default_name), self.config_default)
+            sys.exit(0)
+        elif not args.environment:
+            self.error("the environment name is required")
+
+        if not os.path.exists(args.config):
+            raise self.error('{} does not exist'.format(args.config))
+
+        return args, namespace
+
+
+def parser():
+    parser = ArgumentParser(description='LAMNFYC. v.{}'.format(__version__))
+    parser.default_name = default_name = 'lamnfyc.yaml'
+    parser.config_default = config_default = os.path.join(os.getcwd(), default_name)
 
     parser.add_argument('-c', '--config', default=config_default,
                         help='path to the config file, [default: {}]'.format(config_default))
@@ -37,17 +55,15 @@ def main():
         help='Verbosity level; 0=normal output, 10=DEBUG, 20=INFO',
     )
 
-    args, vargs = parser.parse_known_args()
+    return parser
 
-    if args.init:
-        if os.path.exists(config_default):
-            log.fatal('ERROR: File {} already exists.'.format(config_default))
-            sys.exit(3)
-        shutil.copyfile(os.path.join(lamnfyc.settings.BASE_PATH, default_name), config_default)
-        sys.exit(0)
-    elif not args.environment:
-        parser.error("the environment name is required")
 
+def main():
+    args, _ = parser().parse_known_args()
+    return _main(args)
+
+
+def _main(args):
     environment_config = lamnfyc.utils.Configuration(args.config)
     # need the absolute path to the environment
     lamnfyc.settings.environment_path = os.path.abspath(os.path.join(os.path.abspath(os.path.curdir),
