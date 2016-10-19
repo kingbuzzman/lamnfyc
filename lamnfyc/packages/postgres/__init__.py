@@ -17,6 +17,23 @@ def installer(package, temp, env):
         subprocess.call(command.format(path=lamnfyc.settings.environment_path), shell=True)
         subprocess.call('make && make install-world-contrib-recurse', shell=True)
 
+        # Install all the contrib files
+        subprocess.call('cd contrib/adminpack; make install', shell=True)
+        subprocess.call('cd contrib/dblink; make install', shell=True)
+        subprocess.call('cd contrib/fuzzystrmatch; make install', shell=True)
+        subprocess.call('cd contrib/lo; make install', shell=True)
+        subprocess.call('cd contrib/uuid-ossp; make install', shell=True)
+        subprocess.call('cd contrib/pg_buffercache; make install', shell=True)
+        subprocess.call('cd contrib/pg_trgm; make install', shell=True)
+        subprocess.call('cd contrib/pgcrypto; make install', shell=True)
+        subprocess.call('cd contrib/tsearch2; make install', shell=True)
+        subprocess.call('cd contrib/vacuumlo; make install', shell=True)
+        subprocess.call('cd contrib/xml2; make install', shell=True)
+        subprocess.call('cd contrib/intarray; make install', shell=True)
+        subprocess.call('cd contrib/pg_upgrade; make install', shell=True)
+        subprocess.call('cd contrib/pg_upgrade_support; make install', shell=True)
+        subprocess.call('cd contrib/hstore; make install', shell=True)
+
 
 class PostgresPackage(lamnfyc.packages.base.TarPacket):
     BASE_PATH = os.path.dirname(os.path.realpath(__file__))
