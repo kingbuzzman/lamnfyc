@@ -20,6 +20,9 @@ OPTIONS+="--logfile $VIRTUAL_ENV/logs/redis.log "`
         `"--pidfile $REDIS_PID "`
         `"--daemonize yes "
 
+# clear the logs -- otherwise it will get incredibly long
+> $VIRTUAL_ENV/logs/redis.log
+
 $VIRTUAL_ENV/bin/redis-server $VIRTUAL_ENV/conf/redis.conf $OPTIONS
 
 printf " Done\n"

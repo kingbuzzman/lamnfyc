@@ -24,6 +24,9 @@ OPTIONS+="-c max_files_per_process={{options.max_files_per_process}} "`
 echo "Starting postgres"
 _check_and_set_sysctl
 
+# clear the logs -- otherwise it will get incredibly long
+> $VIRTUAL_ENV/logs/postgres.log
+
 $VIRTUAL_ENV/bin/pg_ctl start \
   -D $VIRTUAL_ENV/data \
   -w \
