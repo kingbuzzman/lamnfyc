@@ -60,11 +60,13 @@ Are you using `virtualenvwrapper`? Then do `lamnfyc $WORKON_HOME/env`
 
   create the environment, for this particular example the name of our environment is going to be called `xenv`
 
+  Note: if you're already inside a virtualenv its best to run it like so: `env -i ...`
+
 * `rm /tmp/test`
 
   at this point you can delete the `/tmp/test` directory, its not needed
 
-* `xenv/bin/activate`
+* `source xenv/bin/activate`
 
   now play around with it.. remember to `deactivate` it when you're done
 
