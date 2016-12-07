@@ -1,0 +1,3 @@
+#!/usr/bin/env bash -e
+
+/Applications/pgAdmin\ 4.app/Contents/MacOS/pgAdmin4 -qc "host=$PGHOST port=$PGPORT dbname=$PGDATABASE user=$PGUSER" 2> /dev/null &
