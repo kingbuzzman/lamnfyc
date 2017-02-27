@@ -108,6 +108,7 @@ class Configuration(object):
         MESSAGE = self.MESSAGE
         for variable, value in sorted(self.env.items(), key=operator.itemgetter(0)):
             if not missing_only or value is None or value == '':
+                value = value or os.getenv(variable)
                 message = MESSAGE.format(name=variable, default=value or '')
                 value = raw_input(message) or value or ''
             else:

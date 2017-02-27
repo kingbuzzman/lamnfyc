@@ -62,15 +62,7 @@ class BasePacket(object):
 
     @property
     def cache_exists(self):
-        if os.path.exists(self.path):
-            if self.valid_signature():
-                return True
-            log.debug('Removing the {}-{} cache file, signature was no good: {}'.format(self.name,
-                                                                                        self.version,
-                                                                                        self.path))
-            os.remove(self.path)
-        # nothing found
-        return False
+        return self.verify_cache(raise_exception=False)
 
     @property
     def is_properly_installed(self):
@@ -116,6 +108,21 @@ class BasePacket(object):
         # # self.option2 = options.pop('option2') # this is now required
         pass
 
+    def verify_cache(self, raise_exception=False):
+        if os.path.exists(self.path):
+            if self.valid_signature():
+                return True
+
+            MESSAGE = 'Removing the {}-{} cache file, signature was no good: {}'.format(self.name,
+                                                                                        self.version,
+                                                                                        self.path)
+            log.debug(MESSAGE)
+            os.remove(self.path)
+            if raise_exception:
+                raise Exception(MESSAGE)
+
+        return False
+
     def dependencies(self):
         for dependency in self._dependencies:
             package = lamnfyc.utils.import_package(dependency.name, dependency.version)
@@ -158,7 +165,8 @@ class BasePacket(object):
         log.debug('Downloading {}-{}, saving it to {}'.format(self.name, self.version, self.path))
         lamnfyc.utils.download(self.url, self.path)
         log.debug('Download {}-{} complete'.format(self.name, self.version))
-        return True
+        # verify everything was downloaded correctly
+        return self.verify_cache(raise_exception=True)
 
     @property
     def environment_variables(self):

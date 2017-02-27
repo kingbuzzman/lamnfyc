@@ -13,7 +13,7 @@ def two_seven_installer(package, temp, env):
     command = '''LDFLAGS="-L{path}/lib"
                  CPPFLAGS="-I{path}/include -I{path}/ssl"
                  CFLAGS="-I{path}/include"
-                 LD_LIBRARY_PATH={path}/lib ./configure --prefix={path} --enable-shared --with-ensurepip=yes'''
+                 LD_LIBRARY_PATH={path}/lib ./configure --prefix={path} --with-ensurepip=yes --libdir={path}/lib'''
     temp = os.path.join(temp, 'Python-{}'.format(package.version))
     with lamnfyc.context_managers.chdir(temp):
         subprocess.call(command.format(path=lamnfyc.settings.environment_path), env=env, shell=True)
@@ -46,6 +46,9 @@ class Python27Package(PythonPackage):
     # attributed to the environment if not there
     ENVIRONMENT_VARIABLES = (
         ('PYTHONNOUSERSITE', '$VIRTUAL_ENV/lib/python2.7/site-packages',),
+        ('LDSHARED', 'clang -bundle -undefined dynamic_lookup',),
+        ('LDCXXSHARED', 'clang++ -bundle -undefined dynamic_lookup',),
+        ('BLDSHARED', '$LDSHARED',),
     )
 
 

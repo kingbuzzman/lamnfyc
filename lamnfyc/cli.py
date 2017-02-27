@@ -143,7 +143,11 @@ def _main(args):
 
     # download all the packages that are missing
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        executor.map(lambda package: package.download() if not package.cache_exists else None, downloads)
+        futures = executor.map(lambda package: package.download() if not package.cache_exists else None, downloads)
+
+    for future in futures:
+        continue
+        #import ipdb; ipdb.set_trace()
 
     # Install all packages, uppermost first, meaning;
     # If say Package1 depends on Package2 which in turn that depends on Package3, the order or the install will be:

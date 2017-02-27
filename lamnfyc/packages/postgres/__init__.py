@@ -1,11 +1,11 @@
 import os
 import collections
+import subprocess
 
 import lamnfyc.context_managers
 import lamnfyc.settings
 import lamnfyc.decorators
 import lamnfyc.packages.base
-import subprocess
 
 
 @lamnfyc.decorators.check_installed('bin/postgres')
@@ -66,6 +66,13 @@ class PostgresPackage(lamnfyc.packages.base.TarPacket):
 VERSIONS = collections.OrderedDict()
 VERSIONS['9.3.9'] = PostgresPackage('https://ftp.postgresql.org/pub/source/v9.3.9/postgresql-9.3.9.tar.bz2',
                                     installer=installer, sha256_signature='f73bd0ec2028511732430beb22414a022d2114231366e8cbe78c149793910549',  # noqa
+                                    depends_on=[
+                                        lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
+                                        lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
+                                    ])
+
+VERSIONS['9.5.4'] = PostgresPackage('https://ftp.postgresql.org/pub/source/v9.5.4/postgresql-9.5.4.tar.bz2',
+                                    installer=installer, sha256_signature='cf5e571164ad66028ecd7dd8819e3765470d45bcd440d258b686be7e69c76ed0',  # noqa
                                     depends_on=[
                                         lamnfyc.packages.base.RequiredPacket(name='readline', version='6.3'),
                                         lamnfyc.packages.base.RequiredPacket(name='openssl', version='1.0.2g'),
