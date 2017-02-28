@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='lamnfyc',
@@ -12,7 +12,7 @@ setup(
     author='Javier Buzzi',
     author_email='buzzi.javier@gmail.com',
     license='MIT',
-    packages=['lamnfyc'],
+    packages=find_packages('.'),
     install_requires=[
         'pyliblzma==0.5.3',
         'futures==3.0.5',
