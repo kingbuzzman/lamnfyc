@@ -112,8 +112,7 @@ def _main(args):
     kwargs = {
         'environment_path': lamnfyc.settings.environment_path,
         'enironment_variables': variable_order(environment_config.env),
-        'unset_variables': ' '.join(environment_config.env.keys()),
-        'environment_path': lamnfyc.settings.environment_path
+        'unset_variables': ' '.join(environment_config.env.keys())
     }
     path = os.path.join(lamnfyc.settings.BASE_PATH, 'templates')
     files = [os.path.join(root, file) for root, dir, files in os.walk(path) for file in files]
@@ -146,8 +145,8 @@ def _main(args):
         futures = executor.map(lambda package: package.download() if not package.cache_exists else None, downloads)
 
     for future in futures:
+        # if any of the futures threw an error it will raise them here and thus the program will halt
         continue
-        #import ipdb; ipdb.set_trace()
 
     # Install all packages, uppermost first, meaning;
     # If say Package1 depends on Package2 which in turn that depends on Package3, the order or the install will be:

@@ -8,6 +8,7 @@ import contextlib
 import shutil
 import jinja2
 import stat
+import urlparse
 # import zipfile
 import collections
 import subprocess
@@ -37,7 +38,8 @@ def change_to_if(value_to_change, default_value, condition):
 
 class BasePacket(object):
     def __init__(self, url, **kwargs):
-        self.url = url
+        self.__url = url
+        self.__cache_key = kwargs.get('cache_key')
         self.installer = lamnfyc.utils.required_parameter(kwargs, 'installer')
         self.check_version = kwargs.get('check_version')
         self.md5_signature = kwargs.get('md5_signature')
@@ -58,7 +60,15 @@ class BasePacket(object):
 
     @property
     def cache_key(self):
-        return os.path.basename(self.url)
+        if not hasattr(self, '_cache_key'):
+            self._cache_key = self.__cache_key or os.path.basename(urlparse.urlsplit(self.url).path)
+        return self._cache_key
+
+    @property
+    def url(self):
+        if not hasattr(self, '_url'):
+            self._url = self.__url() if callable(self.__url) else self.__url
+        return self._url
 
     @property
     def cache_exists(self):
