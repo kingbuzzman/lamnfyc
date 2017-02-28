@@ -9,7 +9,7 @@ import lamnfyc.settings
 import lamnfyc.packages.base
 
 
-@lamnfyc.decorators.check_installed('bin/flyaway')
+@lamnfyc.decorators.check_installed('bin/flyway')
 def installer(package, temp, env):
     with lamnfyc.context_managers.chdir(os.path.join(temp)):
         distutils.dir_util.copy_tree('flyway-{}'.format(package.version),
@@ -30,5 +30,5 @@ VERSIONS['4.1.1'] = lamnfyc.packages.base.TarPacket('https://search.maven.org/re
                                                      ])
 
 for version, item in VERSIONS.iteritems():
-    item.name = 'flyaway'
+    item.name = 'flyway'
     item.version = version
