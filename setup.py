@@ -13,6 +13,7 @@ setup(
     author_email='buzzi.javier@gmail.com',
     license='MIT',
     packages=find_packages('.'),
+    include_package_data=True,
     install_requires=[
         'pyliblzma==0.5.3',
         'futures==3.0.5',
