@@ -9,6 +9,7 @@ import shutil
 import jinja2
 import stat
 import urlparse
+import codecs
 # import zipfile
 import collections
 import subprocess
@@ -223,9 +224,9 @@ class BasePacket(object):
                 # set to write
                 file_obj = open(file_path, 'w')
 
-            with file_obj as file_out:
-                # TODO: is there a better way od doinf this?!
-                file_out.write(jinja2.Template(open(file).read()).render(**template_context))
+            with file_obj as file_out, codecs.open(file, 'rb', 'utf-8') as file_handle:
+                # TODO: is there a better way od doing this?!
+                file_out.write(jinja2.Template(file_handle.read()).render(**template_context))
 
             # If it goes inside /bin then give it exec permissions
             if file_path.replace(lamnfyc.settings.environment_path + os.path.sep, '').split(os.path.sep)[0] == 'bin':
